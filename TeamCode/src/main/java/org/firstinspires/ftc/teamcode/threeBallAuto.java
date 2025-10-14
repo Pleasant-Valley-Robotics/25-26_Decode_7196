@@ -62,8 +62,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  * main robot "loop," continuously checking for conditions that allow us to move to the next step.
  */
 
-@Autonomous(name="leaveAuto", group="StarterBot")
-public class leaveAuto extends OpMode
+@Autonomous(name="threeBallAuto", group="StarterBot")
+public class threeBallAuto extends OpMode
 {
 
     final double FEED_TIME = 0.20; //The feeder servos run this long when a shot is requested.
@@ -233,7 +233,7 @@ public class leaveAuto extends OpMode
         launcher.setZeroPowerBehavior(BRAKE);
 
         /*
-         * Here we set our launcher to the RUN_USING_ENCODER runmode.
+         * Here we set our launcher to the RUN_USING_ENCODER run-mode.
          * If you notice that you have no control over the velocity of the motor, and it just jumps
          * right to a number much higher than your set point, make sure that your encoders are plugged
          * into the port right beside the motor itself.
