@@ -363,9 +363,9 @@ public class threeBallAuto extends OpMode
 
             case ROTATING:
                 if(alliance == Alliance.RED){
-                    robotRotationAngle = 70;
+                    robotRotationAngle = 90;
                 } else if (alliance == Alliance.BLUE){
-                    robotRotationAngle = -70;
+                    robotRotationAngle = -90;
                 }
 
                 if(rotate(ROTATE_SPEED, robotRotationAngle, AngleUnit.DEGREES,1)){
