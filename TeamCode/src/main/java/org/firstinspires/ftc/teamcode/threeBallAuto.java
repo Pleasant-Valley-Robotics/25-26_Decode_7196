@@ -363,9 +363,9 @@ public class threeBallAuto extends OpMode
 
             case ROTATING:
                 if(alliance == Alliance.RED){
-                    robotRotationAngle = 60;
+                    robotRotationAngle = 70;
                 } else if (alliance == Alliance.BLUE){
-                    robotRotationAngle = -60;
+                    robotRotationAngle = -70;
                 }
 
                 if(rotate(ROTATE_SPEED, robotRotationAngle, AngleUnit.DEGREES,1)){
@@ -378,7 +378,7 @@ public class threeBallAuto extends OpMode
                 break;
 
             case DRIVING_OFF_LINE:
-                if(drive(DRIVE_SPEED, -30, DistanceUnit.INCH, 1)){
+                if(drive(DRIVE_SPEED, -34, DistanceUnit.INCH, 1)){
                     autonomousState = AutonomousState.COMPLETE;
                 }
                 break;
