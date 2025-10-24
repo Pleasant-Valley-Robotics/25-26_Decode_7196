@@ -34,17 +34,21 @@ package org.firstinspires.ftc.teamcode;
 
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
 
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
 
 /*
@@ -62,8 +66,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  * main robot "loop," continuously checking for conditions that allow us to move to the next step.
  */
 
-@Autonomous(name="threeBallAuto", group="StarterBot")
-public class threeBallAuto extends OpMode
+@Autonomous(name="SmallTriangleTwo", group="StarterBot")
+public class SmallTriangleAUTOTwo extends OpMode
 {
 
     final double FEED_TIME = 0.20; //The feeder servos run this long when a shot is requested.
@@ -82,7 +86,7 @@ public class threeBallAuto extends OpMode
      * can be much shorter, but the longer break is reasonable since it maximizes the likelihood
      * that each shot will score.
      */
-    final double TIME_BETWEEN_SHOTS = 2;
+    final double TIME_BETWEEN_SHOTS = 3;
 
     /*
      * Here we capture a few variables used in driving the robot. DRIVE_SPEED and ROTATE_SPEED
@@ -121,6 +125,25 @@ public class threeBallAuto extends OpMode
     private DcMotorEx launcher = null;
     private CRServo leftFeeder = null;
     private CRServo rightFeeder = null;
+    private IMU imu = null;      // Control/Expansion Hub IMU
+    private double headingError  = 0;
+    private double  targetHeading = 0;
+    static final double     HEADING_THRESHOLD       = 1.0 ;    // How close must the heading get to the target before moving to next step.
+    private double  driveSpeed    = 0;
+    private double  turnSpeed     = 0;
+    private double  frontLeftSpeed     = 0;
+    private double  backLeftSpeed     = 0;
+    private double  frontRightSpeed     = 0;
+    private double  backRightSpeed     = 0;
+
+    private int     leftTarget    = 0;
+    private int     rightTarget   = 0;
+    // Requiring more accuracy (a smaller number) will often make the turn take longer to get into the final position.
+    // Define the Proportional control coefficient (or GAIN) for "heading control".
+    // We define one value when Turning (larger errors), and the other is used when Driving straight (smaller errors).
+    // Increase these numbers if the heading does not correct strongly enough (eg: a heavy robot or using tracks)
+    // Decrease these numbers if the heading does not settle on the correct value (eg: very agile robot with omni wheels)
+    static final double     P_TURN_GAIN            = 0.02;     // Larger is more responsive, but also less stable.
 
     /*
      * TECH TIP: State Machines
@@ -153,7 +176,10 @@ public class threeBallAuto extends OpMode
         LAUNCH,
         WAIT_FOR_LAUNCH,
         DRIVING_AWAY_FROM_GOAL,
+        DRIVING_TOWARD_THE_GOAL,
         ROTATING,
+        APPROACH_GOAL,
+        RESET_TURN,
         DRIVING_OFF_LINE,
         COMPLETE;
     }
@@ -183,7 +209,7 @@ public class threeBallAuto extends OpMode
          * Later in our code, we will progress through the state machine by moving to other enum members.
          * We do the same for our launcher state machine, setting it to IDLE before we use it later.
          */
-        autonomousState = AutonomousState.DRIVING_AWAY_FROM_GOAL;
+        autonomousState = AutonomousState.DRIVING_TOWARD_THE_GOAL;
         launchState = LaunchState.IDLE;
 
 
@@ -212,6 +238,20 @@ public class threeBallAuto extends OpMode
         backLeftDrive.setDirection(DcMotor.Direction.REVERSE);
         frontRightDrive.setDirection(DcMotor.Direction.FORWARD);
         backRightDrive.setDirection(DcMotor.Direction.FORWARD);
+
+        /* The next two lines define Hub orientation.
+         * The Default Orientation (shown) is when a hub is mounted horizontally with the printed logo pointing UP and the USB port pointing FORWARD.
+         *
+         * To Do:  EDIT these two lines to match YOUR mounting configuration.
+         */
+        RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.UP;
+        RevHubOrientationOnRobot.UsbFacingDirection  usbDirection  = RevHubOrientationOnRobot.UsbFacingDirection.FORWARD;
+        RevHubOrientationOnRobot orientationOnRobot = new RevHubOrientationOnRobot(logoDirection, usbDirection);
+
+        // Now initialize the IMU with this mounting orientation
+        // This sample expects the IMU to be in a REV Hub and named "imu".
+        imu = hardwareMap.get(IMU.class, "imu");
+        imu.initialize(new IMU.Parameters(orientationOnRobot));
 
         /*
          * Here we reset the encoders on our drive motors before we start moving.
@@ -306,6 +346,46 @@ public class threeBallAuto extends OpMode
          * we know our enum isn't reflecting a different state.
          */
         switch (autonomousState){
+            case DRIVING_TOWARD_THE_GOAL:
+                /*
+                 * This is another function that returns a boolean. This time we return "true" if
+                 * the robot has been within a tolerance of the target position for "holdSeconds."
+                 * Once the function returns "true" we reset the encoders again and move on.
+                 */
+                if(drive(DRIVE_SPEED, 120, DistanceUnit.INCH, 1)){
+                    frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    backLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    backRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    autonomousState = AutonomousState.ROTATING;
+                }
+                break;
+
+            case ROTATING:
+                if(alliance == Alliance.RED){
+                    robotRotationAngle = -45;
+                } else if (alliance == Alliance.BLUE){
+                    robotRotationAngle = 45;
+                }
+
+                if(rotate(ROTATE_SPEED, robotRotationAngle, AngleUnit.DEGREES,1)){
+                    frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    backLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    backRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    autonomousState = AutonomousState.APPROACH_GOAL;
+                }
+                break;
+
+            case APPROACH_GOAL:
+
+                if(drive(DRIVE_SPEED, 12, DistanceUnit.INCH, 1)){
+                frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                backLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                backRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                autonomousState = AutonomousState.LAUNCH;
+            }
             /*
              * Since the first state of our auto is LAUNCH, this is the first "case" we encounter.
              * This case is very simple. We call our .launch() function with "true" in the parameter.
@@ -341,9 +421,20 @@ public class threeBallAuto extends OpMode
                         frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                         backRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                         launcher.setVelocity(0);
-                        autonomousState = AutonomousState.ROTATING;
+                        autonomousState = AutonomousState.RESET_TURN;
                     }
                 }
+                break;
+
+            case RESET_TURN:
+                if(alliance == Alliance.RED){
+                    robotRotationAngle = 0;
+                } else if (alliance == Alliance.BLUE){
+                    robotRotationAngle = 0;
+                }
+
+                turnToHeading(0.2, robotRotationAngle);
+                autonomousState = AutonomousState.DRIVING_AWAY_FROM_GOAL;
                 break;
 
             case DRIVING_AWAY_FROM_GOAL:
@@ -361,27 +452,7 @@ public class threeBallAuto extends OpMode
                 }
                 break;
 
-            case ROTATING:
-                if(alliance == Alliance.RED){
-                    robotRotationAngle = 90;
-                } else if (alliance == Alliance.BLUE){
-                    robotRotationAngle = -90;
-                }
 
-                if(rotate(ROTATE_SPEED, robotRotationAngle, AngleUnit.DEGREES,1)){
-                    frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                    backLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                    frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                    backRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                    autonomousState = AutonomousState.DRIVING_OFF_LINE;
-                }
-                break;
-
-            case DRIVING_OFF_LINE:
-                if(drive(DRIVE_SPEED, -34, DistanceUnit.INCH, 1)){
-                    autonomousState = AutonomousState.COMPLETE;
-                }
-                break;
         }
 
         /*
@@ -478,7 +549,6 @@ public class threeBallAuto extends OpMode
         frontRightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         backRightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-
         frontLeftDrive.setPower(speed);
         backLeftDrive.setPower(speed);
         frontRightDrive.setPower(speed);
@@ -499,6 +569,83 @@ public class threeBallAuto extends OpMode
         }
 
         return (driveTimer.seconds() > holdSeconds);
+    }
+
+    /**
+     * Take separate drive (fwd/rev) and turn (right/left) requests,
+     * combines them, and applies the appropriate speed commands to the left and right wheel motors.
+     * @param drive forward motor speed
+     * @param turn  clockwise turning motor speed.
+     */
+    public void moveRobot(double drive, double turn) {
+        driveSpeed = drive;     // save this value as a class member so it can be used by telemetry.
+        turnSpeed  = turn;      // save this value as a class member so it can be used by telemetry.
+
+        frontLeftSpeed  = drive - turn;
+        backLeftSpeed  = drive - turn;
+        frontRightSpeed = drive + turn;
+        backRightSpeed = drive + turn;
+
+        // Scale speeds down if either one exceeds +/- 1.0;
+        double max = Math.max(Math.abs(frontLeftSpeed), Math.abs(frontRightSpeed));
+        if (max > 1.0)
+        {
+            frontLeftSpeed /= max;
+            backLeftSpeed /= max;
+            frontRightSpeed /= max;
+            backRightSpeed /= max;
+
+        }
+
+        frontLeftDrive.setPower(frontLeftSpeed);
+        backLeftDrive.setPower(backLeftSpeed);
+        frontRightDrive.setPower(frontRightSpeed);
+        backRightDrive.setPower(backRightSpeed);
+    }
+
+    public void turnToHeading(double maxTurnSpeed, double heading) {
+
+        // Run getSteeringCorrection() once to pre-calculate the current error
+        getSteeringCorrection(heading, P_TURN_GAIN);
+
+        // keep looping while we are still active, and not on heading.
+        while ((Math.abs(headingError) > HEADING_THRESHOLD)) {
+
+            // Determine required steering to keep on heading
+            double turnSpeed = getSteeringCorrection(heading, P_TURN_GAIN);
+
+            // Clip the speed to the maximum permitted value.
+            turnSpeed = Range.clip(turnSpeed, -maxTurnSpeed, maxTurnSpeed);
+
+            // Pivot in place by applying the turning correction
+            moveRobot(0, turnSpeed);
+        }
+
+        // Stop all motion;
+        moveRobot(0, 0);
+    }
+
+    // **********  LOW Level driving functions.  ********************
+
+    /**
+     * Use a Proportional Controller to determine how much steering correction is required.
+     *
+     * @param desiredHeading        The desired absolute heading (relative to last heading reset)
+     * @param proportionalGain      Gain factor applied to heading error to obtain turning power.
+     * @return                      Turning power needed to get to required heading.
+     */
+    public double getSteeringCorrection(double desiredHeading, double proportionalGain) {
+        targetHeading = desiredHeading;  // Save for telemetry
+
+        // Determine the heading current error
+        headingError = targetHeading - getHeading();
+
+        // Normalize the error to be within +/- 180 degrees
+        while (headingError > 180)  headingError -= 360;
+        while (headingError <= -180) headingError += 360;
+
+        // Multiply the error by the gain to determine the required steering correction/  Limit the result to +/- 1.0
+        return Range.clip(headingError * proportionalGain, -1, 1);
     }
 
     /**
@@ -537,7 +684,6 @@ public class threeBallAuto extends OpMode
         frontRightDrive.setTargetPosition((int) frontRightTargetPosition);
         backRightDrive.setTargetPosition((int) backRightTargetPosition);
 
-
         frontLeftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         backLeftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         frontRightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -553,6 +699,36 @@ public class threeBallAuto extends OpMode
         }
 
         return (driveTimer.seconds() > holdSeconds);
+    }
+
+    /**
+     * read the Robot heading directly from the IMU (in degrees)
+     */
+    public double getHeading() {
+        YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
+        return orientation.getYaw(AngleUnit.DEGREES);
+    }
+
+    /**
+     *  Display the various control parameters while driving
+     *
+     * @param straight  Set to true if we are driving straight, and the encoder positions should be included in the telemetry.
+     */
+    private void sendTelemetry(boolean straight) {
+
+        if (straight) {
+            telemetry.addData("Motion", "Drive Straight");
+            telemetry.addData("Target Pos L:R",  "%7d:%7d",      leftTarget,  rightTarget);
+            telemetry.addData("Actual Pos frontLeft:frontRight:backLeftDrive:backRightDrive",  "%7d:%7d",      frontLeftDrive.getCurrentPosition(),
+                    frontRightDrive.getCurrentPosition(), backLeftDrive.getCurrentPosition(), backRightDrive.getCurrentPosition());
+        } else {
+            telemetry.addData("Motion", "Turning");
+        }
+
+        telemetry.addData("Heading- Target : Current", "%5.2f : %5.0f", targetHeading, getHeading());
+        telemetry.addData("Error  : Steer Pwr",  "%5.1f : %5.1f", headingError, turnSpeed);
+        telemetry.addData("Wheel Speeds L : R", "%5.2f : %5.2f", frontLeftSpeed, frontRightSpeed);
+        telemetry.update();
     }
 }
 
