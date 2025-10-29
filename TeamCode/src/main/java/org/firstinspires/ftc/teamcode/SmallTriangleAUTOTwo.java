@@ -78,15 +78,15 @@ public class SmallTriangleAUTOTwo extends OpMode
      * velocity. Here we are setting the target and minimum velocity that the launcher should run
      * at. The minimum velocity is a threshold for determining when to fire.
      */
-    final double LAUNCHER_TARGET_VELOCITY = 1125;
-    final double LAUNCHER_MIN_VELOCITY = 1075;
+    final double LAUNCHER_TARGET_VELOCITY = 1200;
+    final double LAUNCHER_MIN_VELOCITY = 1100;
 
     /*
      * The number of seconds that we wait between each of our 3 shots from the launcher. This
      * can be much shorter, but the longer break is reasonable since it maximizes the likelihood
      * that each shot will score.
      */
-    final double TIME_BETWEEN_SHOTS = 3;
+    final double TIME_BETWEEN_SHOTS = 3.5;
 
     /*
      * Here we capture a few variables used in driving the robot. DRIVE_SPEED and ROTATE_SPEED
@@ -97,7 +97,7 @@ public class SmallTriangleAUTOTwo extends OpMode
      * robot. Track width is used to determine the amount of linear distance each wheel needs to
      * travel to create a specified rotation of the robot.
      */
-    final double DRIVE_SPEED = 1.0;
+    final double DRIVE_SPEED = 0.7;
     final double ROTATE_SPEED = 0.4;
     final double WHEEL_DIAMETER_MM = 96;
     final double ENCODER_TICKS_PER_REV = 537.7;
@@ -244,15 +244,15 @@ public class SmallTriangleAUTOTwo extends OpMode
          *
          * To Do:  EDIT these two lines to match YOUR mounting configuration.
          */
-        RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.UP;
-        RevHubOrientationOnRobot.UsbFacingDirection  usbDirection  = RevHubOrientationOnRobot.UsbFacingDirection.FORWARD;
+        RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.LEFT;
+        RevHubOrientationOnRobot.UsbFacingDirection  usbDirection  = RevHubOrientationOnRobot.UsbFacingDirection.UP;
         RevHubOrientationOnRobot orientationOnRobot = new RevHubOrientationOnRobot(logoDirection, usbDirection);
 
         // Now initialize the IMU with this mounting orientation
         // This sample expects the IMU to be in a REV Hub and named "imu".
         imu = hardwareMap.get(IMU.class, "imu");
         imu.initialize(new IMU.Parameters(orientationOnRobot));
-
+        imu.resetYaw();
         /*
          * Here we reset the encoders on our drive motors before we start moving.
          */
@@ -368,18 +368,27 @@ public class SmallTriangleAUTOTwo extends OpMode
                     robotRotationAngle = 45;
                 }
 
-                if(rotate(ROTATE_SPEED, robotRotationAngle, AngleUnit.DEGREES,1)){
+               // if(rotate(ROTATE_SPEED, robotRotationAngle, AngleUnit.DEGREES,1))
+                {  frontLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    backLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    frontRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    backRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+                    turnToHeading(ROTATE_SPEED, robotRotationAngle);
+                    turnToHeading(0.25, 45);
+
                     frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     backLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     backRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
                     autonomousState = AutonomousState.APPROACH_GOAL;
                 }
                 break;
 
             case APPROACH_GOAL:
 
-                if(drive(DRIVE_SPEED, 12, DistanceUnit.INCH, 1)){
+                if(drive(DRIVE_SPEED, 24, DistanceUnit.INCH, 1)){
                 frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 backLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -428,12 +437,23 @@ public class SmallTriangleAUTOTwo extends OpMode
 
             case RESET_TURN:
                 if(alliance == Alliance.RED){
-                    robotRotationAngle = 0;
+                    robotRotationAngle = 45;
                 } else if (alliance == Alliance.BLUE){
-                    robotRotationAngle = 0;
+                    robotRotationAngle = -45;
                 }
+                frontLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                backLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                frontRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                backRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-                turnToHeading(0.2, robotRotationAngle);
+                turnToHeading(ROTATE_SPEED, robotRotationAngle);
+                turnToHeading(0.25, 0);
+
+                frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                backLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                backRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
                 autonomousState = AutonomousState.DRIVING_AWAY_FROM_GOAL;
                 break;
 
@@ -443,15 +463,16 @@ public class SmallTriangleAUTOTwo extends OpMode
                  * the robot has been within a tolerance of the target position for "holdSeconds."
                  * Once the function returns "true" we reset the encoders again and move on.
                  */
-                if(drive(DRIVE_SPEED, -26, DistanceUnit.INCH, 1)){
+                if(drive(DRIVE_SPEED, -40, DistanceUnit.INCH, 1)){
+
                     frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     backLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     backRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                    autonomousState = AutonomousState.LAUNCH;
+
+                    autonomousState = AutonomousState.COMPLETE;
                 }
                 break;
-
 
         }
 
@@ -464,6 +485,7 @@ public class SmallTriangleAUTOTwo extends OpMode
          * "copy-and-paste" that non-state machine autonomous routines fall into.
          */
         telemetry.addData("AutoState", autonomousState);
+        telemetry.addData("Rotation", );
         telemetry.addData("LauncherState", launchState);
         telemetry.addData("Motor Current Positions", "left (%d), right (%d)",
                 frontLeftDrive.getCurrentPosition(), backLeftDrive.getCurrentPosition());
