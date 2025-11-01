@@ -34,9 +34,12 @@ package org.firstinspires.ftc.teamcode;
 
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
 
+import static java.lang.Thread.sleep;
+
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -49,6 +52,8 @@ import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+
+import java.util.Timer;
 
 
 /*
@@ -78,8 +83,8 @@ public class SmallTriangleAUTOTwo extends OpMode
      * velocity. Here we are setting the target and minimum velocity that the launcher should run
      * at. The minimum velocity is a threshold for determining when to fire.
      */
-    final double LAUNCHER_TARGET_VELOCITY = 1200;
-    final double LAUNCHER_MIN_VELOCITY = 1100;
+    final double LAUNCHER_TARGET_VELOCITY = 1100;
+    final double LAUNCHER_MIN_VELOCITY = 1000;
 
     /*
      * The number of seconds that we wait between each of our 3 shots from the launcher. This
@@ -97,7 +102,7 @@ public class SmallTriangleAUTOTwo extends OpMode
      * robot. Track width is used to determine the amount of linear distance each wheel needs to
      * travel to create a specified rotation of the robot.
      */
-    final double DRIVE_SPEED = 0.7;
+    final double DRIVE_SPEED = 0.6;
     final double ROTATE_SPEED = 0.4;
     final double WHEEL_DIAMETER_MM = 96;
     final double ENCODER_TICKS_PER_REV = 537.7;
@@ -144,6 +149,7 @@ public class SmallTriangleAUTOTwo extends OpMode
     // Increase these numbers if the heading does not correct strongly enough (eg: a heavy robot or using tracks)
     // Decrease these numbers if the heading does not settle on the correct value (eg: very agile robot with omni wheels)
     static final double     P_TURN_GAIN            = 0.02;     // Larger is more responsive, but also less stable.
+    ElapsedTime firstShotTimer = new ElapsedTime();
 
     /*
      * TECH TIP: State Machines
@@ -363,9 +369,9 @@ public class SmallTriangleAUTOTwo extends OpMode
 
             case ROTATING:
                 if(alliance == Alliance.RED){
-                    robotRotationAngle = -45;
+                    robotRotationAngle = -47;
                 } else if (alliance == Alliance.BLUE){
-                    robotRotationAngle = 45;
+                    robotRotationAngle = 50;
                 }
 
                // if(rotate(ROTATE_SPEED, robotRotationAngle, AngleUnit.DEGREES,1))
@@ -375,7 +381,6 @@ public class SmallTriangleAUTOTwo extends OpMode
                     backRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
                     turnToHeading(ROTATE_SPEED, robotRotationAngle);
-                    turnToHeading(0.25, 45);
 
                     frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     backLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -388,12 +393,13 @@ public class SmallTriangleAUTOTwo extends OpMode
 
             case APPROACH_GOAL:
 
-                if(drive(DRIVE_SPEED, 24, DistanceUnit.INCH, 1)){
+                if(drive(DRIVE_SPEED, 30, DistanceUnit.INCH, 1)){
                 frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 backLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 backRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 autonomousState = AutonomousState.LAUNCH;
+                firstShotTimer.reset();
             }
             /*
              * Since the first state of our auto is LAUNCH, this is the first "case" we encounter.
@@ -404,8 +410,15 @@ public class SmallTriangleAUTOTwo extends OpMode
              * allowing it to cycle through and continue the process of launching the first ball.
              */
             case LAUNCH:
-                launch(true);
-                autonomousState = AutonomousState.WAIT_FOR_LAUNCH;
+                if (firstShotTimer.seconds() >= 1.0) {
+                    launchState = SmallTriangleAUTOTwo.LaunchState.IDLE;
+                    leftFeeder.setPower(0);
+                    rightFeeder.setPower(0);
+
+                    launch(true);
+
+                    autonomousState = AutonomousState.WAIT_FOR_LAUNCH;
+                }
                 break;
 
             case WAIT_FOR_LAUNCH:
@@ -437,9 +450,9 @@ public class SmallTriangleAUTOTwo extends OpMode
 
             case RESET_TURN:
                 if(alliance == Alliance.RED){
-                    robotRotationAngle = 45;
+                    robotRotationAngle = 0;
                 } else if (alliance == Alliance.BLUE){
-                    robotRotationAngle = -45;
+                    robotRotationAngle = 0;
                 }
                 frontLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 backLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -447,7 +460,6 @@ public class SmallTriangleAUTOTwo extends OpMode
                 backRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
                 turnToHeading(ROTATE_SPEED, robotRotationAngle);
-                turnToHeading(0.25, 0);
 
                 frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 backLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -485,7 +497,6 @@ public class SmallTriangleAUTOTwo extends OpMode
          * "copy-and-paste" that non-state machine autonomous routines fall into.
          */
         telemetry.addData("AutoState", autonomousState);
-        telemetry.addData("Rotation", );
         telemetry.addData("LauncherState", launchState);
         telemetry.addData("Motor Current Positions", "left (%d), right (%d)",
                 frontLeftDrive.getCurrentPosition(), backLeftDrive.getCurrentPosition());
