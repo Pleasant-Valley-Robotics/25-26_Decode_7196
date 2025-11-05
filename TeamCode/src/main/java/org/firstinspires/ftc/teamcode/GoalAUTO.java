@@ -74,8 +74,8 @@ public class GoalAUTO extends OpMode
      * velocity. Here we are setting the target and minimum velocity that the launcher should run
      * at. The minimum velocity is a threshold for determining when to fire.
      */
-    final double LAUNCHER_TARGET_VELOCITY = 1125;
-    final double LAUNCHER_MIN_VELOCITY = 1075;
+    final double LAUNCHER_TARGET_VELOCITY = 1200;
+    final double LAUNCHER_MIN_VELOCITY = 1100;
 
     /*
      * The number of seconds that we wait between each of our 3 shots from the launcher. This
@@ -230,6 +230,7 @@ public class GoalAUTO extends OpMode
         backLeftDrive.setZeroPowerBehavior(BRAKE);
         frontRightDrive.setZeroPowerBehavior(BRAKE);
         backRightDrive.setZeroPowerBehavior(BRAKE);
+
         launcher.setZeroPowerBehavior(BRAKE);
 
         /*

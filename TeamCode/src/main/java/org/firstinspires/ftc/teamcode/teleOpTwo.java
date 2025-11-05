@@ -58,8 +58,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * we will also need to adjust the "PIDF" coefficients with some that are a better fit for our application.
  */
 
-@TeleOp(name = "TeleOpTestRun", group = "StarterBot")
-public class TeleOpTestRun extends OpMode {
+@TeleOp(name = "teleOp", group = "StarterBot")
+public class teleOpTwo extends OpMode {
     final double FEED_TIME_SECONDS = 0.20; //The feeder servos run this long when a shot is requested.
     final double STOP_SPEED = 0.0; //We send this power to the servos when we want them to stop.
     final double FULL_SPEED = 1.0;
@@ -70,13 +70,8 @@ public class TeleOpTestRun extends OpMode {
      * velocity. Here we are setting the target, and minimum velocity that the launcher should run
      * at. The minimum velocity is a threshold for determining when to fire.
      */
-    final double LAUNCHER_TARGET_VELOCITY = 2000;
-    final double LAUNCHER_MIN_VELOCITY = 1100;
-
-    double LOW = 1100;
-    double MID = 1550;
-    double HIGH = 2000;
-    double STOP = 0;
+    final double LAUNCHER_TARGET_VELOCITY = 1500;
+    final double LAUNCHER_MIN_VELOCITY = 1300;
 
     // Declare OpMode members.
     private DcMotor frontLeftDrive = null;
@@ -221,17 +216,15 @@ public class TeleOpTestRun extends OpMode {
      */
     @Override
     public void loop() {
-
         /*
          * Here we call a function called arcadeDrive. The arcadeDrive function takes the input from
          * the joysticks, and applies power to the left and right drive motor to move the robot
          * as requested by the driver. "arcade" refers to the control style we're using here.
-         * Much like a classic arcade game, when you move the left joystick forward, all 4 motors
+         * Much like a classic arcade game, when you move the left joystick forward both motors
          * work to drive the robot forward, and when you move the right joystick left and right
-         * two motors across from each other work to rotate the robot. Combinations of these inputs
-         * can be used to create more complex maneuvers.
+         * both motors work to rotate the robot. Combinations of these inputs can be used to create
+         * more complex maneuvers.
          */
-
        //arcadeDrive(-gamepad1.left_stick_y, gamepad1.right_stick_x);
         mecanumDrive(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
 
@@ -239,21 +232,7 @@ public class TeleOpTestRun extends OpMode {
          * Here we give the user control of the speed of the launcher motor without automatically
          * queuing a shot.
          */
-        if (gamepad2.a) {
-            launcher.setVelocity(LOW);
-            telemetry.addData("Launcher Mode", "LOW (A)");
-        } else if (gamepad2.x) {
-            launcher.setVelocity(MID);
-            telemetry.addData("Launcher Mode", "MID (X)");
-        } else if (gamepad2.y) {
-            launcher.setVelocity(HIGH);
-            telemetry.addData("Launcher Mode", "HIGH (Y)");
-        } else if (gamepad2.b) {
-            launcher.setVelocity(STOP);
-            telemetry.addData("Launcher Mode", "STOP (B)");
-        }
-
-        if (Math.abs(gamepad2.right_stick_y) > 0.1) {
+        if (gamepad1.y) {
             launcher.setVelocity(LAUNCHER_TARGET_VELOCITY);
         } else if (gamepad2.b) { // stop flywheel
             launcher.setVelocity(STOP_SPEED);
@@ -283,8 +262,8 @@ public class TeleOpTestRun extends OpMode {
     void mecanumDrive(double axial, double lateral, double yaw) {
         double max = 0.0;
         double frontLeftPower = axial + lateral + yaw;
-        double backLeftPower = axial - lateral + yaw;
         double frontRightPower = axial - lateral - yaw;
+        double backLeftPower = axial - lateral + yaw;
         double backRightPower = axial + lateral - yaw;
 
         max = Math.max(Math.abs(frontLeftPower), Math.abs(frontRightPower));
