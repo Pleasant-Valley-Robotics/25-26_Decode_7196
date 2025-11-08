@@ -83,8 +83,8 @@ public class SmallTriangleAUTOTwo extends OpMode
      * velocity. Here we are setting the target and minimum velocity that the launcher should run
      * at. The minimum velocity is a threshold for determining when to fire.
      */
-    final double LAUNCHER_TARGET_VELOCITY = 1100;
-    final double LAUNCHER_MIN_VELOCITY = 1000;
+    final double LAUNCHER_TARGET_VELOCITY = 1300;
+    final double LAUNCHER_MIN_VELOCITY = 1150;
 
     /*
      * The number of seconds that we wait between each of our 3 shots from the launcher. This
@@ -393,7 +393,7 @@ public class SmallTriangleAUTOTwo extends OpMode
 
             case APPROACH_GOAL:
 
-                if(drive(DRIVE_SPEED, 30, DistanceUnit.INCH, 1)){
+                if(drive(DRIVE_SPEED, 16, DistanceUnit.INCH, 1)){
                 frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 backLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
