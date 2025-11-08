@@ -58,8 +58,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * we will also need to adjust the "PIDF" coefficients with some that are a better fit for our application.
  */
 
-@TeleOp(name = "teleOpOne", group = "StarterBot")
-public class teleOpOne extends OpMode {
+@TeleOp(name = "doNotPickThisProgram", group = "StarterBot")
+public class doNotPickThisProgram extends OpMode {
     final double FEED_TIME_SECONDS = 0.20; //The feeder servos run this long when a shot is requested.
     final double STOP_SPEED = 0.0; //We send this power to the servos when we want them to stop.
     final double FULL_SPEED = 1.0;
@@ -70,8 +70,15 @@ public class teleOpOne extends OpMode {
      * velocity. Here we are setting the target, and minimum velocity that the launcher should run
      * at. The minimum velocity is a threshold for determining when to fire.
      */
-    final double LAUNCHER_TARGET_VELOCITY = 1300;
+
+    //final double LAUNCHER_TARGET_VELOCITY = 1800;
     final double LAUNCHER_MIN_VELOCITY = 1100;
+
+
+    final double LOW_LAUNCH = 1300;
+    final double MID_LAUNCH = 1500;
+    final double HIGH_LAUNCH = 1800;
+
 
     // Declare OpMode members.
     private DcMotor frontLeftDrive = null;
@@ -114,7 +121,7 @@ public class teleOpOne extends OpMode {
     double backLeftPower;
     double frontRightPower;
     double backRightPower;
-
+    double selectedLaunchVelocity = 0;
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -228,12 +235,23 @@ public class teleOpOne extends OpMode {
        //arcadeDrive(-gamepad1.left_stick_y, gamepad1.right_stick_x);
         mecanumDrive(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
 
+        if(gamepad2.a) {
+            selectedLaunchVelocity = LOW_LAUNCH;
+        } else if (gamepad2.x) {
+            selectedLaunchVelocity = MID_LAUNCH;
+        } else if (gamepad2.y) {
+            selectedLaunchVelocity = HIGH_LAUNCH;
+        } else if (gamepad2.b) {
+            selectedLaunchVelocity = 0;
+        }
+
+        launcher.setVelocity(selectedLaunchVelocity);
         /*
          * Here we give the user control of the speed of the launcher motor without automatically
          * queuing a shot.
          */
         if (gamepad1.y) {
-            launcher.setVelocity(LAUNCHER_TARGET_VELOCITY);
+            launcher.setVelocity(MID_LAUNCH);
         } else if (gamepad1.b) { // stop flywheel
             launcher.setVelocity(STOP_SPEED);
         }
@@ -241,15 +259,16 @@ public class teleOpOne extends OpMode {
         /*
          * Now we call our "Launch" function.
          */
-        launch(gamepad1.rightBumperWasPressed());
+        launch(gamepad2.rightBumperWasPressed());
 
         /*
          * Show the state and motor powers
          */
         telemetry.addData("State", launchState);
         telemetry.addData("Motors", "left (%.2f), right (%.2f)", frontLeftPower, backLeftPower, frontRightPower, backRightPower);
-        telemetry.addData("motorSpeed", launcher.getVelocity());
+        telemetry.addData("LauncherSpeed", launcher.getVelocity());
         telemetry.update();
+
     }
 
     /*
@@ -301,13 +320,13 @@ public class teleOpOne extends OpMode {
     void launch(boolean shotRequested) {
         switch (launchState) {
             case IDLE:
-                if (shotRequested) {
+                if (shotRequested && selectedLaunchVelocity > 0) {
                     launchState = LaunchState.SPIN_UP;
                 }
                 break;
             case SPIN_UP:
-                launcher.setVelocity(LAUNCHER_TARGET_VELOCITY);
-                if (launcher.getVelocity() > LAUNCHER_MIN_VELOCITY) {
+                launcher.setVelocity(LAUNCHER_MIN_VELOCITY);
+                if (launcher.getVelocity() >= selectedLaunchVelocity * 0.9) {
                     launchState = LaunchState.LAUNCH;
                 }
                 break;
