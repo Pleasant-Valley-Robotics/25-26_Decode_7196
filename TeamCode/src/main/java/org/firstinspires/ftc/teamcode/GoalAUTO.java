@@ -62,7 +62,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  * main robot "loop," continuously checking for conditions that allow us to move to the next step.
  */
 
-@Autonomous(name="GoalAuto", group="StarterBot")
+@Autonomous(name="GoalAUTO", group="StarterBot")
 public class GoalAUTO extends OpMode
 {
 
@@ -74,8 +74,8 @@ public class GoalAUTO extends OpMode
      * velocity. Here we are setting the target and minimum velocity that the launcher should run
      * at. The minimum velocity is a threshold for determining when to fire.
      */
-    final double LAUNCHER_TARGET_VELOCITY = 1125;
-    final double LAUNCHER_MIN_VELOCITY = 1075;
+    final double LAUNCHER_TARGET_VELOCITY = 1300;
+    final double LAUNCHER_MIN_VELOCITY = 1100;
 
     /*
      * The number of seconds that we wait between each of our 3 shots from the launcher. This
@@ -93,7 +93,7 @@ public class GoalAUTO extends OpMode
      * robot. Track width is used to determine the amount of linear distance each wheel needs to
      * travel to create a specified rotation of the robot.
      */
-    final double DRIVE_SPEED = 0.75;
+    final double DRIVE_SPEED = 0.5;
     final double ROTATE_SPEED = 0.25;
     final double WHEEL_DIAMETER_MM = 96;
     final double ENCODER_TICKS_PER_REV = 537.7;
@@ -230,6 +230,7 @@ public class GoalAUTO extends OpMode
         backLeftDrive.setZeroPowerBehavior(BRAKE);
         frontRightDrive.setZeroPowerBehavior(BRAKE);
         backRightDrive.setZeroPowerBehavior(BRAKE);
+
         launcher.setZeroPowerBehavior(BRAKE);
 
         /*
@@ -349,9 +350,9 @@ public class GoalAUTO extends OpMode
 
             case ROTATING:
                 if(alliance == Alliance.RED){
-                    robotRotationAngle = 90;
+                    robotRotationAngle = 100;
                 } else if (alliance == Alliance.BLUE){
-                    robotRotationAngle = -90;
+                    robotRotationAngle = -100;
                 }
 
                 if(rotate(ROTATE_SPEED, robotRotationAngle, AngleUnit.DEGREES,1)){
@@ -369,7 +370,7 @@ public class GoalAUTO extends OpMode
                  * the robot has been within a tolerance of the target position for "holdSeconds."
                  * Once the function returns "true" we reset the encoders again and move on.
                  */
-                if(drive(DRIVE_SPEED, -26, DistanceUnit.INCH, 1)){
+                if(drive(DRIVE_SPEED, -40, DistanceUnit.INCH, 1)){
                     frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     backLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -379,7 +380,7 @@ public class GoalAUTO extends OpMode
                 break;
 
             case DRIVING_OFF_LINE:
-                if(drive(DRIVE_SPEED, -52, DistanceUnit.INCH, 1)){
+                if(drive(DRIVE_SPEED, 30, DistanceUnit.INCH, 1)){
                     autonomousState = AutonomousState.COMPLETE;
                 }
                 break;

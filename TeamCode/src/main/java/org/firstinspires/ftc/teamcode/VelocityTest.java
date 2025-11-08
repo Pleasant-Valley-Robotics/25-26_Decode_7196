@@ -34,31 +34,17 @@ package org.firstinspires.ftc.teamcode;
 
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
 
-import static java.lang.Thread.sleep;
-
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
-import org.firstinspires.ftc.vision.VisionPortal;
-import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
-import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
-
-import java.util.List;
 
 
 /*
@@ -76,8 +62,8 @@ import java.util.List;
  * main robot "loop," continuously checking for conditions that allow us to move to the next step.
  */
 
-@Autonomous(name="SmallTriangleTwo", group="StarterBot")
-public class SmallTriangleAUTOTwo extends OpMode
+@Autonomous(name="VelocityTest", group="StarterBot")
+public class VelocityTest extends OpMode
 {
 
     final double FEED_TIME = 0.20; //The feeder servos run this long when a shot is requested.
@@ -88,15 +74,15 @@ public class SmallTriangleAUTOTwo extends OpMode
      * velocity. Here we are setting the target and minimum velocity that the launcher should run
      * at. The minimum velocity is a threshold for determining when to fire.
      */
-    final double LAUNCHER_TARGET_VELOCITY = 1300;
-    final double LAUNCHER_MIN_VELOCITY = 1100;
+    final double LAUNCHER_TARGET_VELOCITY = 1450;
+    final double LAUNCHER_MIN_VELOCITY = 1250;
 
     /*
      * The number of seconds that we wait between each of our 3 shots from the launcher. This
      * can be much shorter, but the longer break is reasonable since it maximizes the likelihood
      * that each shot will score.
      */
-    final double TIME_BETWEEN_SHOTS = 3.5;
+    final double TIME_BETWEEN_SHOTS = 3;
 
     /*
      * Here we capture a few variables used in driving the robot. DRIVE_SPEED and ROTATE_SPEED
@@ -107,8 +93,8 @@ public class SmallTriangleAUTOTwo extends OpMode
      * robot. Track width is used to determine the amount of linear distance each wheel needs to
      * travel to create a specified rotation of the robot.
      */
-    final double DRIVE_SPEED = 0.6;
-    final double ROTATE_SPEED = 0.4;
+    final double DRIVE_SPEED = 0.75;
+    final double ROTATE_SPEED = 0.25;
     final double WHEEL_DIAMETER_MM = 96;
     final double ENCODER_TICKS_PER_REV = 537.7;
     final double TICKS_PER_MM = (ENCODER_TICKS_PER_REV / (WHEEL_DIAMETER_MM * Math.PI));
@@ -126,7 +112,6 @@ public class SmallTriangleAUTOTwo extends OpMode
     private ElapsedTime shotTimer = new ElapsedTime();
     private ElapsedTime feederTimer = new ElapsedTime();
     private ElapsedTime driveTimer = new ElapsedTime();
-    ElapsedTime firstShotTimer = new ElapsedTime();
 
     // Declare OpMode members.
     private DcMotor frontLeftDrive = null;
@@ -136,37 +121,6 @@ public class SmallTriangleAUTOTwo extends OpMode
     private DcMotorEx launcher = null;
     private CRServo leftFeeder = null;
     private CRServo rightFeeder = null;
-    private IMU imu = null;      // Control/Expansion Hub IMU
-    private double headingError  = 0;
-    private double  targetHeading = 0;
-    static final double     HEADING_THRESHOLD       = 1.0 ;    // How close must the heading get to the target before moving to next step.
-    private double  driveSpeed    = 0;
-    private double  turnSpeed     = 0;
-    private double  frontLeftSpeed     = 0;
-    private double  backLeftSpeed     = 0;
-    private double  frontRightSpeed     = 0;
-    private double  backRightSpeed     = 0;
-
-    private int     leftTarget    = 0;
-    private int     rightTarget   = 0;
-    // Requiring more accuracy (a smaller number) will often make the turn take longer to get into the final position.
-    // Define the Proportional control coefficient (or GAIN) for "heading control".
-    // We define one value when Turning (larger errors), and the other is used when Driving straight (smaller errors).
-    // Increase these numbers if the heading does not correct strongly enough (eg: a heavy robot or using tracks)
-    // Decrease these numbers if the heading does not settle on the correct value (eg: very agile robot with omni wheels)
-    static final double     P_TURN_GAIN            = 0.02;     // Larger is more responsive, but also less stable.
-
-    private static final boolean USE_WEBCAM = true;  // true for webcam, false for phone camera
-
-    /**
-     * The variable to store our instance of the AprilTag processor.
-     */
-    private AprilTagProcessor aprilTag;
-
-    /**
-     * The variable to store our instance of the vision portal.
-     */
-    private VisionPortal visionPortal;
 
     /*
      * TECH TIP: State Machines
@@ -199,10 +153,7 @@ public class SmallTriangleAUTOTwo extends OpMode
         LAUNCH,
         WAIT_FOR_LAUNCH,
         DRIVING_AWAY_FROM_GOAL,
-        DRIVING_TOWARD_THE_GOAL,
         ROTATING,
-        APPROACH_GOAL,
-        RESET_TURN,
         DRIVING_OFF_LINE,
         COMPLETE;
     }
@@ -232,9 +183,7 @@ public class SmallTriangleAUTOTwo extends OpMode
          * Later in our code, we will progress through the state machine by moving to other enum members.
          * We do the same for our launcher state machine, setting it to IDLE before we use it later.
          */
-
-        initAprilTag();
-        autonomousState = AutonomousState.DRIVING_TOWARD_THE_GOAL;
+        autonomousState = AutonomousState.DRIVING_AWAY_FROM_GOAL;
         launchState = LaunchState.IDLE;
 
 
@@ -264,20 +213,6 @@ public class SmallTriangleAUTOTwo extends OpMode
         frontRightDrive.setDirection(DcMotor.Direction.FORWARD);
         backRightDrive.setDirection(DcMotor.Direction.FORWARD);
 
-        /* The next two lines define Hub orientation.
-         * The Default Orientation (shown) is when a hub is mounted horizontally with the printed logo pointing UP and the USB port pointing FORWARD.
-         *
-         * To Do:  EDIT these two lines to match YOUR mounting configuration.
-         */
-        RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.LEFT;
-        RevHubOrientationOnRobot.UsbFacingDirection  usbDirection  = RevHubOrientationOnRobot.UsbFacingDirection.UP;
-        RevHubOrientationOnRobot orientationOnRobot = new RevHubOrientationOnRobot(logoDirection, usbDirection);
-
-        // Now initialize the IMU with this mounting orientation
-        // This sample expects the IMU to be in a REV Hub and named "imu".
-        imu = hardwareMap.get(IMU.class, "imu");
-        imu.initialize(new IMU.Parameters(orientationOnRobot));
-        imu.resetYaw();
         /*
          * Here we reset the encoders on our drive motors before we start moving.
          */
@@ -295,6 +230,7 @@ public class SmallTriangleAUTOTwo extends OpMode
         backLeftDrive.setZeroPowerBehavior(BRAKE);
         frontRightDrive.setZeroPowerBehavior(BRAKE);
         backRightDrive.setZeroPowerBehavior(BRAKE);
+
         launcher.setZeroPowerBehavior(BRAKE);
 
         /*
@@ -309,7 +245,7 @@ public class SmallTriangleAUTOTwo extends OpMode
          * Here we set the aforementioned PID coefficients. You shouldn't have to do this for any
          * other motors on this robot.
          */
-        launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,new PIDFCoefficients(300,0,0,10));
+        launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(300,0,0,10));
 
         /*
          * Much like our drivetrain motors, we set the left feeder servo to reverse so that they
@@ -354,7 +290,6 @@ public class SmallTriangleAUTOTwo extends OpMode
      */
     @Override
     public void start() {
-        visionPortal.resumeStreaming();
     }
 
     /*
@@ -371,68 +306,7 @@ public class SmallTriangleAUTOTwo extends OpMode
          * of the members of the enum for a match, since if we find the "break" line in one case,
          * we know our enum isn't reflecting a different state.
          */
-        telemetryAprilTag();
-
-        // Push telemetry to the Driver Station.
-       // telemetry.update();
-
-        // Save CPU resources; can resume streaming when needed.
-//        if (gamepad1.dpad_down) {
-//            visionPortal.stopStreaming();
-//        } else if (gamepad1.dpad_up) {
-//            visionPortal.resumeStreaming();
-//        }
-
         switch (autonomousState){
-            case DRIVING_TOWARD_THE_GOAL:
-                /*
-                 * This is another function that returns a boolean. This time we return "true" if
-                 * the robot has been within a tolerance of the target position for "holdSeconds."
-                 * Once the function returns "true" we reset the encoders again and move on.
-                 */
-                if(drive(DRIVE_SPEED, 120, DistanceUnit.INCH, 1)){
-                    frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                    backLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                    frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                    backRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                    autonomousState = AutonomousState.ROTATING;
-                }
-                break;
-
-            case ROTATING:
-                if(alliance == Alliance.RED){
-                    robotRotationAngle = -47;
-                } else if (alliance == Alliance.BLUE){
-                    robotRotationAngle = 50;
-                }
-
-               // if(rotate(ROTATE_SPEED, robotRotationAngle, AngleUnit.DEGREES,1))
-                {  frontLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    backLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    frontRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    backRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-                    turnToHeading(ROTATE_SPEED, robotRotationAngle);
-
-                    frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                    backLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                    frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                    backRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-                    autonomousState = AutonomousState.APPROACH_GOAL;
-                }
-                break;
-
-            case APPROACH_GOAL:
-
-                if(drive(DRIVE_SPEED, 15, DistanceUnit.INCH, 1)){
-                frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                backLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                backRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                autonomousState = AutonomousState.LAUNCH;
-                firstShotTimer.reset();
-            }
             /*
              * Since the first state of our auto is LAUNCH, this is the first "case" we encounter.
              * This case is very simple. We call our .launch() function with "true" in the parameter.
@@ -442,15 +316,8 @@ public class SmallTriangleAUTOTwo extends OpMode
              * allowing it to cycle through and continue the process of launching the first ball.
              */
             case LAUNCH:
-                if (firstShotTimer.seconds() >= 1.0) {
-                    launchState = SmallTriangleAUTOTwo.LaunchState.IDLE;
-                    leftFeeder.setPower(0);
-                    rightFeeder.setPower(0);
-
-                    launch(true);
-
-                    autonomousState = AutonomousState.WAIT_FOR_LAUNCH;
-                }
+                launch(true);
+                autonomousState = AutonomousState.WAIT_FOR_LAUNCH;
                 break;
 
             case WAIT_FOR_LAUNCH:
@@ -465,6 +332,7 @@ public class SmallTriangleAUTOTwo extends OpMode
                  * state on our state machine. Otherwise, we reset the encoders on our drive motors
                  * and move onto the next state.
                  */
+
                 if(launch(false)) {
                     shotsToFire -= 1;
                     if(shotsToFire > 0) {
@@ -475,30 +343,25 @@ public class SmallTriangleAUTOTwo extends OpMode
                         frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                         backRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                         launcher.setVelocity(0);
-                        autonomousState = AutonomousState.RESET_TURN;
+                        autonomousState = AutonomousState.ROTATING;
                     }
                 }
                 break;
 
-            case RESET_TURN:
+            case ROTATING:
                 if(alliance == Alliance.RED){
-                    robotRotationAngle = 0;
+                    robotRotationAngle = 100;
                 } else if (alliance == Alliance.BLUE){
-                    robotRotationAngle = 0;
+                    robotRotationAngle = -100;
                 }
-                frontLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                backLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                frontRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                backRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-                turnToHeading(ROTATE_SPEED, robotRotationAngle);
-
-                frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                backLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                backRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-                autonomousState = AutonomousState.DRIVING_AWAY_FROM_GOAL;
+                if(rotate(ROTATE_SPEED, robotRotationAngle, AngleUnit.DEGREES,1)){
+                    frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    backLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    backRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    autonomousState = AutonomousState.DRIVING_OFF_LINE;
+                }
                 break;
 
             case DRIVING_AWAY_FROM_GOAL:
@@ -507,17 +370,20 @@ public class SmallTriangleAUTOTwo extends OpMode
                  * the robot has been within a tolerance of the target position for "holdSeconds."
                  * Once the function returns "true" we reset the encoders again and move on.
                  */
-                if(drive(DRIVE_SPEED, -40, DistanceUnit.INCH, 1)){
-
+                if(drive(DRIVE_SPEED, -34, DistanceUnit.INCH, 1)){
                     frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     backLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     backRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-                    autonomousState = AutonomousState.COMPLETE;
+                    autonomousState = AutonomousState.LAUNCH;
                 }
                 break;
 
+            case DRIVING_OFF_LINE:
+                if(drive(DRIVE_SPEED, 30, DistanceUnit.INCH, 1)){
+                    autonomousState = AutonomousState.COMPLETE;
+                }
+                break;
         }
 
         /*
@@ -614,6 +480,7 @@ public class SmallTriangleAUTOTwo extends OpMode
         frontRightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         backRightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
+
         frontLeftDrive.setPower(speed);
         backLeftDrive.setPower(speed);
         frontRightDrive.setPower(speed);
@@ -634,83 +501,6 @@ public class SmallTriangleAUTOTwo extends OpMode
         }
 
         return (driveTimer.seconds() > holdSeconds);
-    }
-
-    /**
-     * Take separate drive (fwd/rev) and turn (right/left) requests,
-     * combines them, and applies the appropriate speed commands to the left and right wheel motors.
-     * @param drive forward motor speed
-     * @param turn  clockwise turning motor speed.
-     */
-    public void moveRobot(double drive, double turn) {
-        driveSpeed = drive;     // save this value as a class member so it can be used by telemetry.
-        turnSpeed  = turn;      // save this value as a class member so it can be used by telemetry.
-
-        frontLeftSpeed  = drive - turn;
-        backLeftSpeed  = drive - turn;
-        frontRightSpeed = drive + turn;
-        backRightSpeed = drive + turn;
-
-        // Scale speeds down if either one exceeds +/- 1.0;
-        double max = Math.max(Math.abs(frontLeftSpeed), Math.abs(frontRightSpeed));
-        if (max > 1.0)
-        {
-            frontLeftSpeed /= max;
-            backLeftSpeed /= max;
-            frontRightSpeed /= max;
-            backRightSpeed /= max;
-
-        }
-
-        frontLeftDrive.setPower(frontLeftSpeed);
-        backLeftDrive.setPower(backLeftSpeed);
-        frontRightDrive.setPower(frontRightSpeed);
-        backRightDrive.setPower(backRightSpeed);
-    }
-
-    public void turnToHeading(double maxTurnSpeed, double heading) {
-
-        // Run getSteeringCorrection() once to pre-calculate the current error
-        getSteeringCorrection(heading, P_TURN_GAIN);
-
-        // keep looping while we are still active, and not on heading.
-        while ((Math.abs(headingError) > HEADING_THRESHOLD)) {
-
-            // Determine required steering to keep on heading
-            double turnSpeed = getSteeringCorrection(heading, P_TURN_GAIN);
-
-            // Clip the speed to the maximum permitted value.
-            turnSpeed = Range.clip(turnSpeed, -maxTurnSpeed, maxTurnSpeed);
-
-            // Pivot in place by applying the turning correction
-            moveRobot(0, turnSpeed);
-        }
-
-        // Stop all motion;
-        moveRobot(0, 0);
-    }
-
-    // **********  LOW Level driving functions.  ********************
-
-    /**
-     * Use a Proportional Controller to determine how much steering correction is required.
-     *
-     * @param desiredHeading        The desired absolute heading (relative to last heading reset)
-     * @param proportionalGain      Gain factor applied to heading error to obtain turning power.
-     * @return                      Turning power needed to get to required heading.
-     */
-    public double getSteeringCorrection(double desiredHeading, double proportionalGain) {
-        targetHeading = desiredHeading;  // Save for telemetry
-
-        // Determine the heading current error
-        headingError = targetHeading - getHeading();
-
-        // Normalize the error to be within +/- 180 degrees
-        while (headingError > 180)  headingError -= 360;
-        while (headingError <= -180) headingError += 360;
-
-        // Multiply the error by the gain to determine the required steering correction/  Limit the result to +/- 1.0
-        return Range.clip(headingError * proportionalGain, -1, 1);
     }
 
     /**
@@ -749,6 +539,7 @@ public class SmallTriangleAUTOTwo extends OpMode
         frontRightDrive.setTargetPosition((int) frontRightTargetPosition);
         backRightDrive.setTargetPosition((int) backRightTargetPosition);
 
+
         frontLeftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         backLeftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         frontRightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -765,85 +556,6 @@ public class SmallTriangleAUTOTwo extends OpMode
 
         return (driveTimer.seconds() > holdSeconds);
     }
-
-    /**
-     * read the Robot heading directly from the IMU (in degrees)
-     */
-    public double getHeading() {
-        YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
-        return orientation.getYaw(AngleUnit.DEGREES);
-    }
-
-    /**
-     *  Display the various control parameters while driving
-     *
-     * @param straight  Set to true if we are driving straight, and the encoder positions should be included in the telemetry.
-     */
-    private void sendTelemetry(boolean straight) {
-
-        if (straight) {
-            telemetry.addData("Motion", "Drive Straight");
-            telemetry.addData("Target Pos L:R",  "%7d:%7d",      leftTarget,  rightTarget);
-            telemetry.addData("Actual Pos frontLeft:frontRight:backLeftDrive:backRightDrive",  "%7d:%7d",      frontLeftDrive.getCurrentPosition(),
-                    frontRightDrive.getCurrentPosition(), backLeftDrive.getCurrentPosition(), backRightDrive.getCurrentPosition());
-        } else {
-            telemetry.addData("Motion", "Turning");
-        }
-
-        telemetry.addData("Heading- Target : Current", "%5.2f : %5.0f", targetHeading, getHeading());
-        telemetry.addData("Error  : Steer Pwr",  "%5.1f : %5.1f", headingError, turnSpeed);
-        telemetry.addData("Wheel Speeds L : R", "%5.2f : %5.2f", frontLeftSpeed, frontRightSpeed);
-        telemetry.update();
-    }
-
-    /**
-     * Initialize the AprilTag processor.
-     */
-    private void initAprilTag() {
-
-        // Create the AprilTag processor the easy way.
-        aprilTag = AprilTagProcessor.easyCreateWithDefaults();
-
-        // Create the vision portal the easy way.
-        if (USE_WEBCAM) {
-            visionPortal = VisionPortal.easyCreateWithDefaults(
-                    hardwareMap.get(WebcamName.class, "Webcam 1"), aprilTag);
-        } else {
-            visionPortal = VisionPortal.easyCreateWithDefaults(
-                    BuiltinCameraDirection.BACK, aprilTag);
-        }
-
-    }   // end method initAprilTag()
-
-    /**
-     * Add telemetry about AprilTag detections.
-     */
-
-    private void telemetryAprilTag() {
-
-        List<AprilTagDetection> currentDetections = aprilTag.getDetections();
-        telemetry.addData("# AprilTags Detected", currentDetections.size());
-
-        // Step through the list of detections and display info for each one.
-        for (AprilTagDetection detection : currentDetections) {
-            if (detection.metadata != null) {
-                telemetry.addLine(String.format("\n==== (ID %d) %s", detection.id, detection.metadata.name));
-                telemetry.addLine(String.format("XYZ %6.1f %6.1f %6.1f  (inch)", detection.ftcPose.x, detection.ftcPose.y, detection.ftcPose.z));
-                telemetry.addLine(String.format("PRY %6.1f %6.1f %6.1f  (deg)", detection.ftcPose.pitch, detection.ftcPose.roll, detection.ftcPose.yaw));
-                telemetry.addLine(String.format("RBE %6.1f %6.1f %6.1f  (inch, deg, deg)", detection.ftcPose.range, detection.ftcPose.bearing, detection.ftcPose.elevation));
-            } else {
-                telemetry.addLine(String.format("\n==== (ID %d) Unknown", detection.id));
-                telemetry.addLine(String.format("Center %6.0f %6.0f   (pixels)", detection.center.x, detection.center.y));
-            }
-        }   // end for() loop
-
-        // Add "key" information to telemetry
-        telemetry.addLine("\nkey:\nXYZ = X (Right), Y (Forward), Z (Up) dist.");
-        telemetry.addLine("PRY = Pitch, Roll & Yaw (XYZ Rotation)");
-        telemetry.addLine("RBE = Range, Bearing & Elevation");
-
-    }   // end method telemetryAprilTag()
-
 }
 
 

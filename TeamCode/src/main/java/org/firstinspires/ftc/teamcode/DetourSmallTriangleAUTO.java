@@ -34,12 +34,9 @@ package org.firstinspires.ftc.teamcode;
 
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
 
-import static java.lang.Thread.sleep;
-
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -76,8 +73,8 @@ import java.util.List;
  * main robot "loop," continuously checking for conditions that allow us to move to the next step.
  */
 
-@Autonomous(name="SmallTriangleTwo", group="StarterBot")
-public class SmallTriangleAUTOTwo extends OpMode
+@Autonomous(name="DetourSmallTriangleAUTO", group="StarterBot")
+public class DetourSmallTriangleAUTO extends OpMode
 {
 
     final double FEED_TIME = 0.20; //The feeder servos run this long when a shot is requested.
@@ -88,15 +85,15 @@ public class SmallTriangleAUTOTwo extends OpMode
      * velocity. Here we are setting the target and minimum velocity that the launcher should run
      * at. The minimum velocity is a threshold for determining when to fire.
      */
-    final double LAUNCHER_TARGET_VELOCITY = 1300;
-    final double LAUNCHER_MIN_VELOCITY = 1100;
+    final double LAUNCHER_TARGET_VELOCITY = 1900;
+    final double LAUNCHER_MIN_VELOCITY = 1700;
 
     /*
      * The number of seconds that we wait between each of our 3 shots from the launcher. This
      * can be much shorter, but the longer break is reasonable since it maximizes the likelihood
      * that each shot will score.
      */
-    final double TIME_BETWEEN_SHOTS = 3.5;
+    final double TIME_BETWEEN_SHOTS = 4;
 
     /*
      * Here we capture a few variables used in driving the robot. DRIVE_SPEED and ROTATE_SPEED
@@ -107,8 +104,8 @@ public class SmallTriangleAUTOTwo extends OpMode
      * robot. Track width is used to determine the amount of linear distance each wheel needs to
      * travel to create a specified rotation of the robot.
      */
-    final double DRIVE_SPEED = 0.6;
-    final double ROTATE_SPEED = 0.4;
+    final double DRIVE_SPEED = 0.3;
+    final double ROTATE_SPEED = 0.25;
     final double WHEEL_DIAMETER_MM = 96;
     final double ENCODER_TICKS_PER_REV = 537.7;
     final double TICKS_PER_MM = (ENCODER_TICKS_PER_REV / (WHEEL_DIAMETER_MM * Math.PI));
@@ -127,6 +124,7 @@ public class SmallTriangleAUTOTwo extends OpMode
     private ElapsedTime feederTimer = new ElapsedTime();
     private ElapsedTime driveTimer = new ElapsedTime();
     ElapsedTime firstShotTimer = new ElapsedTime();
+    private ElapsedTime waitTimer = new ElapsedTime();
 
     // Declare OpMode members.
     private DcMotor frontLeftDrive = null;
@@ -196,14 +194,11 @@ public class SmallTriangleAUTOTwo extends OpMode
      * Here is our auto state machine enum. This captures each action we'd like to do in auto.
      */
     private enum AutonomousState {
+        WAITING,
+        DRIVING_TO_GOAL,
+        ROTATING,
         LAUNCH,
         WAIT_FOR_LAUNCH,
-        DRIVING_AWAY_FROM_GOAL,
-        DRIVING_TOWARD_THE_GOAL,
-        ROTATING,
-        APPROACH_GOAL,
-        RESET_TURN,
-        DRIVING_OFF_LINE,
         COMPLETE;
     }
 
@@ -234,7 +229,7 @@ public class SmallTriangleAUTOTwo extends OpMode
          */
 
         initAprilTag();
-        autonomousState = AutonomousState.DRIVING_TOWARD_THE_GOAL;
+        autonomousState = AutonomousState.WAITING;
         launchState = LaunchState.IDLE;
 
 
@@ -355,6 +350,7 @@ public class SmallTriangleAUTOTwo extends OpMode
     @Override
     public void start() {
         visionPortal.resumeStreaming();
+        waitTimer.reset();
     }
 
     /*
@@ -384,28 +380,34 @@ public class SmallTriangleAUTOTwo extends OpMode
 //        }
 
         switch (autonomousState){
-            case DRIVING_TOWARD_THE_GOAL:
+            case WAITING:
+                telemetry.addData("Status", "Waiting...");
+                if (waitTimer.seconds() >= 9.0) {
+                    autonomousState = AutonomousState.DRIVING_TO_GOAL;
+                }
+                break;
+            case DRIVING_TO_GOAL:
                 /*
                  * This is another function that returns a boolean. This time we return "true" if
                  * the robot has been within a tolerance of the target position for "holdSeconds."
                  * Once the function returns "true" we reset the encoders again and move on.
                  */
-                if(drive(DRIVE_SPEED, 120, DistanceUnit.INCH, 1)){
+                if(drive(DRIVE_SPEED, 30, DistanceUnit.INCH, 1)){
+
                     frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     backLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     backRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
                     autonomousState = AutonomousState.ROTATING;
                 }
                 break;
-
             case ROTATING:
                 if(alliance == Alliance.RED){
-                    robotRotationAngle = -47;
+                    robotRotationAngle = -45;
                 } else if (alliance == Alliance.BLUE){
                     robotRotationAngle = 50;
                 }
-
                // if(rotate(ROTATE_SPEED, robotRotationAngle, AngleUnit.DEGREES,1))
                 {  frontLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                     backLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -419,20 +421,11 @@ public class SmallTriangleAUTOTwo extends OpMode
                     frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     backRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-                    autonomousState = AutonomousState.APPROACH_GOAL;
+                    autonomousState = AutonomousState.LAUNCH;
+                    firstShotTimer.reset();
                 }
                 break;
 
-            case APPROACH_GOAL:
-
-                if(drive(DRIVE_SPEED, 15, DistanceUnit.INCH, 1)){
-                frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                backLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                backRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                autonomousState = AutonomousState.LAUNCH;
-                firstShotTimer.reset();
-            }
             /*
              * Since the first state of our auto is LAUNCH, this is the first "case" we encounter.
              * This case is very simple. We call our .launch() function with "true" in the parameter.
@@ -443,7 +436,7 @@ public class SmallTriangleAUTOTwo extends OpMode
              */
             case LAUNCH:
                 if (firstShotTimer.seconds() >= 1.0) {
-                    launchState = SmallTriangleAUTOTwo.LaunchState.IDLE;
+                    launchState = DetourSmallTriangleAUTO.LaunchState.IDLE;
                     leftFeeder.setPower(0);
                     rightFeeder.setPower(0);
 
@@ -475,49 +468,10 @@ public class SmallTriangleAUTOTwo extends OpMode
                         frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                         backRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                         launcher.setVelocity(0);
-                        autonomousState = AutonomousState.RESET_TURN;
+                        autonomousState = AutonomousState.COMPLETE;
                     }
                 }
                 break;
-
-            case RESET_TURN:
-                if(alliance == Alliance.RED){
-                    robotRotationAngle = 0;
-                } else if (alliance == Alliance.BLUE){
-                    robotRotationAngle = 0;
-                }
-                frontLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                backLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                frontRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                backRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-                turnToHeading(ROTATE_SPEED, robotRotationAngle);
-
-                frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                backLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                backRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-                autonomousState = AutonomousState.DRIVING_AWAY_FROM_GOAL;
-                break;
-
-            case DRIVING_AWAY_FROM_GOAL:
-                /*
-                 * This is another function that returns a boolean. This time we return "true" if
-                 * the robot has been within a tolerance of the target position for "holdSeconds."
-                 * Once the function returns "true" we reset the encoders again and move on.
-                 */
-                if(drive(DRIVE_SPEED, -40, DistanceUnit.INCH, 1)){
-
-                    frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                    backLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                    frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                    backRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-                    autonomousState = AutonomousState.COMPLETE;
-                }
-                break;
-
         }
 
         /*

@@ -58,8 +58,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * we will also need to adjust the "PIDF" coefficients with some that are a better fit for our application.
  */
 
-@TeleOp(name = "teleOp", group = "StarterBot")
-public class teleOp extends OpMode {
+@TeleOp(name = "teleOpOne", group = "StarterBot")
+public class teleOpOne extends OpMode {
     final double FEED_TIME_SECONDS = 0.20; //The feeder servos run this long when a shot is requested.
     final double STOP_SPEED = 0.0; //We send this power to the servos when we want them to stop.
     final double FULL_SPEED = 1.0;
@@ -147,6 +147,7 @@ public class teleOp extends OpMode {
         backLeftDrive.setDirection(DcMotor.Direction.REVERSE);
         frontRightDrive.setDirection(DcMotor.Direction.FORWARD);
         backRightDrive.setDirection(DcMotor.Direction.FORWARD);
+
         launcher.setDirection(DcMotor.Direction.FORWARD);
 
         /*
@@ -248,7 +249,7 @@ public class teleOp extends OpMode {
         telemetry.addData("State", launchState);
         telemetry.addData("Motors", "left (%.2f), right (%.2f)", frontLeftPower, backLeftPower, frontRightPower, backRightPower);
         telemetry.addData("motorSpeed", launcher.getVelocity());
-
+        telemetry.update();
     }
 
     /*
