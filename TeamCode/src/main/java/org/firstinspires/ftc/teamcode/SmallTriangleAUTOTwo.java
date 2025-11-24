@@ -80,7 +80,7 @@ import java.util.List;
 public class SmallTriangleAUTOTwo extends OpMode
 {
 
-    final double FEED_TIME = 0.20; //The feeder servos run this long when a shot is requested.
+    final double FEED_TIME = 0.60; //The feeder servos run this long when a shot is requested.
 
     /*
      * When we control our launcher motor, we are using encoders. These allow the control system
@@ -88,8 +88,8 @@ public class SmallTriangleAUTOTwo extends OpMode
      * velocity. Here we are setting the target and minimum velocity that the launcher should run
      * at. The minimum velocity is a threshold for determining when to fire.
      */
-    final double LAUNCHER_TARGET_VELOCITY = 1300;
-    final double LAUNCHER_MIN_VELOCITY = 1100;
+    final double LAUNCHER_TARGET_VELOCITY = 1250;
+    final double LAUNCHER_MIN_VELOCITY = 1050;
 
     /*
      * The number of seconds that we wait between each of our 3 shots from the launcher. This
