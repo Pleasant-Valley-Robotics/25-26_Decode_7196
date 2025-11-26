@@ -93,11 +93,11 @@ public class GoalAUTO extends OpMode
      * robot. Track width is used to determine the amount of linear distance each wheel needs to
      * travel to create a specified rotation of the robot.
      */
-    final double DRIVE_SPEED = 0.5;
+    final double DRIVE_SPEED = 0.4;
     final double ROTATE_SPEED = 0.25;
     final double WHEEL_DIAMETER_MM = 96;
     final double ENCODER_TICKS_PER_REV = 537.7;
-    final double TICKS_PER_MM = (ENCODER_TICKS_PER_REV / (WHEEL_DIAMETER_MM * Math.PI));
+    final double TICKS_PER_MM = (ENCODER_TICKS_PER_REV / (WHEEL_DIAMETER_MM * Math.PI)) * (223.0/312.0);
     final double TRACK_WIDTH_MM = 404;
 
     int shotsToFire = 3; //The number of shots to fire in this auto.
@@ -155,7 +155,7 @@ public class GoalAUTO extends OpMode
         DRIVING_AWAY_FROM_GOAL,
         ROTATING,
         DRIVING_OFF_LINE,
-        COMPLETE;
+        COMPLETE
     }
 
     private AutonomousState autonomousState;
@@ -251,7 +251,7 @@ public class GoalAUTO extends OpMode
          * Much like our drivetrain motors, we set the left feeder servo to reverse so that they
          * both work to feed the ball into the robot.
          */
-        leftFeeder.setDirection(DcMotorSimple.Direction.REVERSE);
+        rightFeeder.setDirection(DcMotorSimple.Direction.REVERSE);
 
 
         // Tell the driver that initialization is complete.
@@ -315,6 +315,21 @@ public class GoalAUTO extends OpMode
              * "false" condition means that we are continuing to call the function every loop,
              * allowing it to cycle through and continue the process of launching the first ball.
              */
+            case DRIVING_AWAY_FROM_GOAL:
+                /*
+                 * This is another function that returns a boolean. This time we return "true" if
+                 * the robot has been within a tolerance of the target position for "holdSeconds."
+                 * Once the function returns "true" we reset the encoders again and move on.
+                 */
+                if(drive(DRIVE_SPEED, -40, DistanceUnit.INCH, 1)){
+                    frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    backLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    backRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    autonomousState = AutonomousState.LAUNCH;
+                }
+                break;
+
             case LAUNCH:
                 launch(true);
                 autonomousState = AutonomousState.WAIT_FOR_LAUNCH;
@@ -350,9 +365,9 @@ public class GoalAUTO extends OpMode
 
             case ROTATING:
                 if(alliance == Alliance.RED){
-                    robotRotationAngle = 100;
+                    robotRotationAngle = 70;
                 } else if (alliance == Alliance.BLUE){
-                    robotRotationAngle = -100;
+                    robotRotationAngle = -70;
                 }
 
                 if(rotate(ROTATE_SPEED, robotRotationAngle, AngleUnit.DEGREES,1)){
@@ -361,21 +376,6 @@ public class GoalAUTO extends OpMode
                     frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     backRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     autonomousState = AutonomousState.DRIVING_OFF_LINE;
-                }
-                break;
-
-            case DRIVING_AWAY_FROM_GOAL:
-                /*
-                 * This is another function that returns a boolean. This time we return "true" if
-                 * the robot has been within a tolerance of the target position for "holdSeconds."
-                 * Once the function returns "true" we reset the encoders again and move on.
-                 */
-                if(drive(DRIVE_SPEED, -40, DistanceUnit.INCH, 1)){
-                    frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                    backLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                    frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                    backRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                    autonomousState = AutonomousState.LAUNCH;
                 }
                 break;
 
@@ -418,7 +418,7 @@ public class GoalAUTO extends OpMode
      *                      state machine and launch the ball.
      * @return "true" for one cycle after a ball has been successfully launched, "false" otherwise.
      */
-    boolean launch(boolean shotRequested){
+    boolean launch (boolean shotRequested){
         switch (launchState) {
             case IDLE:
                 if (shotRequested) {
@@ -479,7 +479,6 @@ public class GoalAUTO extends OpMode
         backLeftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         frontRightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         backRightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
 
         frontLeftDrive.setPower(speed);
         backLeftDrive.setPower(speed);

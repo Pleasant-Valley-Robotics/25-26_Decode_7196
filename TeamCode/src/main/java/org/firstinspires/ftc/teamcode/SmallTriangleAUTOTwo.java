@@ -107,11 +107,11 @@ public class SmallTriangleAUTOTwo extends OpMode
      * robot. Track width is used to determine the amount of linear distance each wheel needs to
      * travel to create a specified rotation of the robot.
      */
-    final double DRIVE_SPEED = 0.6;
-    final double ROTATE_SPEED = 0.4;
+    final double DRIVE_SPEED = 0.4;
+    final double ROTATE_SPEED = 0.25;
     final double WHEEL_DIAMETER_MM = 96;
     final double ENCODER_TICKS_PER_REV = 537.7;
-    final double TICKS_PER_MM = (ENCODER_TICKS_PER_REV / (WHEEL_DIAMETER_MM * Math.PI));
+    final double TICKS_PER_MM = (ENCODER_TICKS_PER_REV / (WHEEL_DIAMETER_MM * Math.PI))  * (223.0/312.0);
     final double TRACK_WIDTH_MM = 404;
 
     int shotsToFire = 3; //The number of shots to fire in this auto.
@@ -315,7 +315,7 @@ public class SmallTriangleAUTOTwo extends OpMode
          * Much like our drivetrain motors, we set the left feeder servo to reverse so that they
          * both work to feed the ball into the robot.
          */
-        leftFeeder.setDirection(DcMotorSimple.Direction.REVERSE);
+        rightFeeder.setDirection(DcMotorSimple.Direction.REVERSE);
 
 
         // Tell the driver that initialization is complete.
