@@ -70,8 +70,8 @@ public class teleOpOne extends OpMode {
      * velocity. Here we are setting the target, and minimum velocity that the launcher should run
      * at. The minimum velocity is a threshold for determining when to fire.
      */
-    final double LAUNCHER_TARGET_VELOCITY = 1300;
-    final double LAUNCHER_MIN_VELOCITY = 1100;
+    final double LAUNCHER_TARGET_VELOCITY = 1250;
+    final double LAUNCHER_MIN_VELOCITY = 1050;
 
     // Declare OpMode members.
     private DcMotor frontLeftDrive = null;

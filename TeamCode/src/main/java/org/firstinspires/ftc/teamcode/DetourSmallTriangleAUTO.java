@@ -36,6 +36,7 @@ import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -73,6 +74,7 @@ import java.util.List;
  * main robot "loop," continuously checking for conditions that allow us to move to the next step.
  */
 
+@Disabled
 @Autonomous(name="DetourSmallTriangleAUTO", group="StarterBot")
 public class DetourSmallTriangleAUTO extends OpMode
 {
