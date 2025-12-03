@@ -20,8 +20,8 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Config
-@Autonomous(name = "RedGoalAUTORR", group = "Autonomous")
-public class RedGoalAUTORR extends LinearOpMode {public class Launcher {
+@Autonomous(name = "RedSmallTriangleAUTORR", group = "Autonomous")
+public class RedSmallTriangleAUTORR extends LinearOpMode {public class Launcher {
     private DcMotorEx launcher;
     private CRServo leftFeeder;
     private CRServo rightFeeder;
@@ -88,7 +88,7 @@ public class RedGoalAUTORR extends LinearOpMode {public class Launcher {
 
     @Override
     public void runOpMode() {
-        Pose2d initialPose = new Pose2d(-55.135, 49.0834, Math.toRadians(131.014));
+        Pose2d initialPose = new Pose2d(62.1499, 17.8955, Math.toRadians(179.1488));
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
         Launcher launcher = new Launcher(hardwareMap);
 
@@ -100,7 +100,7 @@ public class RedGoalAUTORR extends LinearOpMode {public class Launcher {
                 .waitSeconds(1.0);
 
 
-        Vector2d endingPosition = new Vector2d(-61.6131, 11.5718);
+        Vector2d endingPosition = new Vector2d(-61.1642, 11.5718);
 
         //Action trajectoryActionCloseOut = tab1.endTrajectory().fresh()
         //        .strafeTo(new Vector2d(48, 12))
@@ -129,7 +129,7 @@ public class RedGoalAUTORR extends LinearOpMode {public class Launcher {
                 )
         );
         TrajectoryActionBuilder goToEnd = drive.actionBuilder(drive.localizer.getPose())
-                .strafeToLinearHeading(endingPosition, Math.toRadians(-177.7059))
+                .strafeToLinearHeading(endingPosition, Math.toRadians(178.1538))
                 .waitSeconds(1.0);
         Actions.runBlocking(
                 goToEnd.build()

@@ -39,7 +39,6 @@ import static java.lang.Thread.sleep;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -77,7 +76,7 @@ import java.util.List;
  */
 
 @Autonomous(name="SmallTriangleTwo", group="StarterBot")
-public class SmallTriangleAUTOTwo extends OpMode
+public class SmallTriangleAUTO extends OpMode
 {
 
     final double FEED_TIME = 0.60; //The feeder servos run this long when a shot is requested.
@@ -443,7 +442,7 @@ public class SmallTriangleAUTOTwo extends OpMode
              */
             case LAUNCH:
                 if (firstShotTimer.seconds() >= 1.0) {
-                    launchState = SmallTriangleAUTOTwo.LaunchState.IDLE;
+                    launchState = SmallTriangleAUTO.LaunchState.IDLE;
                     leftFeeder.setPower(0);
                     rightFeeder.setPower(0);
 

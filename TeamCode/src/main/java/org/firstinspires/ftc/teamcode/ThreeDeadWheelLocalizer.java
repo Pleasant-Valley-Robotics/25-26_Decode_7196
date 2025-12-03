@@ -19,7 +19,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.messages.ThreeDeadWheelInputsMessage;
 
-
+@Disabled
 @Config
 public final class ThreeDeadWheelLocalizer implements Localizer {
     public static class Params {
