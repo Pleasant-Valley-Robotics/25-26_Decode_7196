@@ -59,9 +59,10 @@ public class RedSmallTriangleAUTORR extends LinearOpMode {public class Launcher 
             }
             double vel = launcher.getVelocity();
             packet.put("launcherVelocity", vel);
-            if (vel > 1200.0) {
+            if (vel > 1250.0) {
                 double tim = feederTimer.seconds();
                 packet.put("feederTimer", tim);
+                launcher.setVelocity(1250.0);
                 leftFeeder.setPower(1.0);
                 rightFeeder.setPower(1.0);
                 startedShooting = true;

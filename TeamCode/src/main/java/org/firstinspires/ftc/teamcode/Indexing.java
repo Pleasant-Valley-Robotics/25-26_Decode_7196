@@ -12,6 +12,7 @@ import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -20,9 +21,9 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@Config
-@Autonomous(name = "BlueSmallTriangleAUTORR", group = "Autonomous")
-public class BlueSmallTriangleAUTORR extends LinearOpMode {public class Launcher {
+@Disabled
+@Autonomous(name = "Indexing", group = "Autonomous")
+public class Indexing extends LinearOpMode {public class Launcher {
     private DcMotorEx launcher;
     private CRServo leftFeeder;
     private CRServo rightFeeder;
@@ -33,7 +34,8 @@ public class BlueSmallTriangleAUTORR extends LinearOpMode {public class Launcher
         launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         launcher.setDirection(DcMotor.Direction.FORWARD);
         launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(300,0,0,10));
+        launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(300, 0, 0, 10));
+
         leftFeeder = hardwareMap.get(CRServo.class, "leftFeeder");
         leftFeeder.setPower(0.0);
         leftFeeder.setDirection(DcMotor.Direction.FORWARD);
@@ -60,7 +62,7 @@ public class BlueSmallTriangleAUTORR extends LinearOpMode {public class Launcher
             }
             double vel = launcher.getVelocity();
             packet.put("launcherVelocity", vel);
-            if (vel > 1250.0) {
+            if (vel > 1200.0) {
                 double tim = feederTimer.seconds();
                 packet.put("feederTimer", tim);
                 leftFeeder.setPower(1.0);
@@ -81,27 +83,70 @@ public class BlueSmallTriangleAUTORR extends LinearOpMode {public class Launcher
             return true;
         }
     }
-    public Action ShootBall()
-    {
-        return new ShootBall();
+
+    public void Index (HardwareMap hardwareMap) {
+        launcher = hardwareMap.get(DcMotorEx.class, "launcher");
+        launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        launcher.setDirection(DcMotor.Direction.REVERSE);
+        launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(300, 0, 0, 10));
+
+        leftFeeder = hardwareMap.get(CRServo.class, "leftFeeder");
+        leftFeeder.setPower(0.0);
+        leftFeeder.setDirection(DcMotor.Direction.FORWARD);
+
+        rightFeeder = hardwareMap.get(CRServo.class, "rightFeeder");
+        rightFeeder.setPower(0.0);
+        rightFeeder.setDirection(DcMotor.Direction.REVERSE);
     }
+
+    public class IndexBall implements Action {
+        private boolean initialized = false;
+
+        @Override
+        public boolean run(@NonNull TelemetryPacket packet) {
+            if (!initialized) {
+                initialized = true;
+                launcher.setVelocity(0.0);
+                leftFeeder.setPower(0.0);
+                rightFeeder.setPower(0.0);
+            }
+
+            double vel = launcher.getVelocity();
+            packet.put("launcherVelocity", vel);
+            if (vel > 500.0) {
+                double tim = feederTimer.seconds();
+                packet.put("feederTimer", tim);
+                leftFeeder.setPower(1.0);
+                rightFeeder.setPower(1.0);
+                return true;
+
+            } else {
+                launcher.setVelocity(500.0);
+                feederTimer.reset();
+                feederTimer.startTime();
+                return false;
+            }
+        }
+    }
+
 }
 
     @Override
     public void runOpMode() {
-        Pose2d initialPose = new Pose2d(62.1499, -17.8955, Math.toRadians(-179.1488));
+        Pose2d initialPose = new Pose2d(62.1499, 17.8955, Math.toRadians(179.1488));
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
         Launcher launcher = new Launcher(hardwareMap);
 
 // This is supposed to go to the coordinates of the shooting distance (-30.6209, 21.5313) with heading 129.5463
 //This is the coordinates for the ending position of Goal AUTO (-61.7134, 17.4823) with heading -177.7059
-        Vector2d shootPosition = new Vector2d(-30.6209, -21.5313);
+        Vector2d shootPosition = new Vector2d(-30.6209, 21.5313);
         TrajectoryActionBuilder goToShoot = drive.actionBuilder(initialPose)
-                .strafeToLinearHeading(shootPosition, Math.toRadians(-129.5463))
+                .strafeToLinearHeading(shootPosition, Math.toRadians(129.5463))
                 .waitSeconds(1.0);
 
 
-        Vector2d endingPosition = new Vector2d(-61.1642, -11.5718);
+        Vector2d endingPosition = new Vector2d(-61.1642, 11.5718);
 
         //Action trajectoryActionCloseOut = tab1.endTrajectory().fresh()
         //        .strafeTo(new Vector2d(48, 12))
@@ -121,16 +166,16 @@ public class BlueSmallTriangleAUTORR extends LinearOpMode {public class Launcher
                 new SequentialAction(
                         goToShoot.build(),
                         new SleepAction(1.0),
-                        launcher.ShootBall(),
+
                         new SleepAction(1.0),
-                        launcher.ShootBall(),
+
                         new SleepAction(1.0),
-                        launcher.ShootBall(),
+
                         new SleepAction(1.0)
                 )
         );
         TrajectoryActionBuilder goToEnd = drive.actionBuilder(drive.localizer.getPose())
-                .strafeToLinearHeading(endingPosition, Math.toRadians(-178.1502))
+                .strafeToLinearHeading(endingPosition, Math.toRadians(178.1538))
                 .waitSeconds(1.0);
         Actions.runBlocking(
                 goToEnd.build()

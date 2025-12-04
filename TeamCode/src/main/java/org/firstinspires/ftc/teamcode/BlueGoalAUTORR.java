@@ -60,11 +60,12 @@ public class BlueGoalAUTORR extends LinearOpMode {public class Launcher {
             }
             double vel = launcher.getVelocity();
             packet.put("launcherVelocity", vel);
-            if (vel > 1200.0) {
+            if (vel > 1225.0) {
                 double tim = feederTimer.seconds();
                 packet.put("feederTimer", tim);
                 leftFeeder.setPower(1.0);
                 rightFeeder.setPower(1.0);
+                launcher.setVelocity(1250.0);
                 startedShooting = true;
 
             } else if (!startedShooting) {
@@ -97,11 +98,11 @@ public class BlueGoalAUTORR extends LinearOpMode {public class Launcher {
 //This is the coordinates for the ending position of Goal AUTO (-61.7134, 17.4823) with heading -177.7059
         Vector2d shootPosition = new Vector2d(-30.6209, -21.5313);
         TrajectoryActionBuilder goToShoot = drive.actionBuilder(initialPose)
-                .strafeToLinearHeading(shootPosition, Math.toRadians(-129.5463))
+                .strafeToLinearHeading(shootPosition, Math.toRadians(-127.5463))
                 .waitSeconds(1.0);
 
 
-        Vector2d endingPosition = new Vector2d(-61.6131, -11.5718);
+        Vector2d endingPosition = new Vector2d(-62.2683, -14.212);
 
         //Action trajectoryActionCloseOut = tab1.endTrajectory().fresh()
         //        .strafeTo(new Vector2d(48, 12))
@@ -130,7 +131,7 @@ public class BlueGoalAUTORR extends LinearOpMode {public class Launcher {
                 )
         );
         TrajectoryActionBuilder goToEnd = drive.actionBuilder(drive.localizer.getPose())
-                .strafeToLinearHeading(endingPosition, Math.toRadians(-177.7059))
+                .strafeToLinearHeading(endingPosition, Math.toRadians(178.9887))
                 .waitSeconds(1.0);
         Actions.runBlocking(
                 goToEnd.build()

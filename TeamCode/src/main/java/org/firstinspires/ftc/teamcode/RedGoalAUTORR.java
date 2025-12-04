@@ -59,7 +59,7 @@ public class RedGoalAUTORR extends LinearOpMode {public class Launcher {
             }
             double vel = launcher.getVelocity();
             packet.put("launcherVelocity", vel);
-            if (vel > 1200.0) {
+            if (vel > 1250.0) {
                 double tim = feederTimer.seconds();
                 packet.put("feederTimer", tim);
                 leftFeeder.setPower(1.0);
