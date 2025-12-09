@@ -76,8 +76,8 @@ public class doNotPickThisProgram extends OpMode {
 
 
     final double LOW_LAUNCH = 1300;
-    final double MID_LAUNCH = 1500;
-    final double HIGH_LAUNCH = 1800;
+    final double MID_LAUNCH = 1450;
+    final double HIGH_LAUNCH = 1750;
 
 
     // Declare OpMode members.
@@ -135,10 +135,10 @@ public class doNotPickThisProgram extends OpMode {
          * to 'get' must correspond to the names assigned during the robot configuration
          * step.
          */
-        frontLeftDrive = hardwareMap.get(DcMotor.class, "frontLeftDrive");
-        backLeftDrive = hardwareMap.get(DcMotor.class, "backLeftDrive");
-        frontRightDrive = hardwareMap.get(DcMotor.class, "frontRightDrive");
-        backRightDrive = hardwareMap.get(DcMotor.class, "backRightDrive");
+        frontLeftDrive = hardwareMap.get(DcMotor.class, "leftFront");
+        backLeftDrive = hardwareMap.get(DcMotor.class, "leftBack");
+        frontRightDrive = hardwareMap.get(DcMotor.class, "rightFront");
+        backRightDrive = hardwareMap.get(DcMotor.class, "rightBack");
         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
         leftFeeder = hardwareMap.get(CRServo.class, "leftFeeder");
         rightFeeder = hardwareMap.get(CRServo.class, "rightFeeder");
@@ -195,8 +195,8 @@ public class doNotPickThisProgram extends OpMode {
          * Much like our drivetrain motors, we set the left feeder servo to reverse so that they
          * both work to feed the ball into the robot.
          */
-        leftFeeder.setDirection(DcMotorSimple.Direction.REVERSE);
-        rightFeeder.setDirection(DcMotorSimple.Direction.FORWARD);
+        leftFeeder.setDirection(DcMotorSimple.Direction.FORWARD);
+        rightFeeder.setDirection(DcMotorSimple.Direction.REVERSE);
 
         /*
          * Tell the driver that initialization is complete.

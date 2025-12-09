@@ -128,10 +128,10 @@ public class teleOpTwo extends OpMode {
          * to 'get' must correspond to the names assigned during the robot configuration
          * step.
          */
-        frontLeftDrive = hardwareMap.get(DcMotor.class, "frontLeftDrive");
-        backLeftDrive = hardwareMap.get(DcMotor.class, "backLeftDrive");
-        frontRightDrive = hardwareMap.get(DcMotor.class, "frontRightDrive");
-        backRightDrive = hardwareMap.get(DcMotor.class, "backRightDrive");
+        frontLeftDrive = hardwareMap.get(DcMotor.class, "leftFront");
+        backLeftDrive = hardwareMap.get(DcMotor.class, "leftBack");
+        frontRightDrive = hardwareMap.get(DcMotor.class, "rightFront");
+        backRightDrive = hardwareMap.get(DcMotor.class, "rightBack");
         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
         leftFeeder = hardwareMap.get(CRServo.class, "leftFeeder");
         rightFeeder = hardwareMap.get(CRServo.class, "rightFeeder");
