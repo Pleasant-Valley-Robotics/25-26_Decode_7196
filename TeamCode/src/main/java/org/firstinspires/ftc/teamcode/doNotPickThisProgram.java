@@ -74,10 +74,12 @@ public class doNotPickThisProgram extends OpMode {
     //final double LAUNCHER_TARGET_VELOCITY = 1800;
     final double LAUNCHER_MIN_VELOCITY = 1100;
 
-
     final double LOW_LAUNCH = 1300;
     final double MID_LAUNCH = 1450;
-    final double HIGH_LAUNCH = 1750;
+    final double HIGH_LAUNCH = 1725;
+
+    final double LAUNCHER_INDEX_TARGET_VELOCITY = 612.5;
+    final double LAUNCHER_INDEX_MIN_VELOCITY = 512.5;
 
 
     // Declare OpMode members.
@@ -113,8 +115,15 @@ public class doNotPickThisProgram extends OpMode {
         LAUNCH,
         LAUNCHING,
     }
+    private enum IndexState {
+        IDLE_INDEX,
+        START_INDEX,
+        INDEX_BALL,
+        STOP_INDEX
 
+    }
     private LaunchState launchState;
+    private IndexState indexState;
 
     // Setup a variable for each drive wheel to save power level for telemetry
     double frontLeftPower;
@@ -260,6 +269,7 @@ public class doNotPickThisProgram extends OpMode {
          * Now we call our "Launch" function.
          */
         launch(gamepad2.rightBumperWasPressed());
+        index(gamepad2.leftBumperWasPressed());
 
         /*
          * Show the state and motor powers
@@ -345,4 +355,33 @@ public class doNotPickThisProgram extends OpMode {
                 break;
         }
     }
+    void index(boolean indexRequested) {
+        switch (indexState) {
+            case IDLE_INDEX:
+                if (indexRequested) {
+                    indexState = IndexState.START_INDEX;
+                }
+                break;
+            case START_INDEX:
+                launcher.setVelocity(LAUNCHER_INDEX_TARGET_VELOCITY);
+                if (launcher.getVelocity() > LAUNCHER_INDEX_MIN_VELOCITY) {
+                    indexState = IndexState.INDEX_BALL;
+                }
+                break;
+            case INDEX_BALL:
+                leftFeeder.setPower(FULL_SPEED);
+                rightFeeder.setPower(FULL_SPEED);
+                feederTimer.reset();
+                indexState = IndexState.STOP_INDEX;
+                break;
+            case STOP_INDEX:
+                if (feederTimer.seconds() > FEED_TIME_SECONDS) {
+                    indexState = IndexState.IDLE_INDEX;
+                    leftFeeder.setPower(STOP_SPEED);
+                    rightFeeder.setPower(STOP_SPEED);
+                }
+                break;
+        }
+    }
+
 }

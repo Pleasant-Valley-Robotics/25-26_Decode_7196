@@ -73,6 +73,9 @@ public class teleOpTwo extends OpMode {
     final double LAUNCHER_TARGET_VELOCITY = 1250;
     final double LAUNCHER_MIN_VELOCITY = 1050;
 
+    final double LAUNCHER_INDEX_TARGET_VELOCITY = 612.5;
+    final double LAUNCHER_INDEX_MIN_VELOCITY = 512.5;
+
     // Declare OpMode members.
     private DcMotor frontLeftDrive = null;
     private DcMotor backLeftDrive = null;
@@ -104,10 +107,17 @@ public class teleOpTwo extends OpMode {
         IDLE,
         SPIN_UP,
         LAUNCH,
-        LAUNCHING,
+        LAUNCHING
     }
+    private enum IndexState {
+        IDLE_INDEX,
+        START_INDEX,
+        INDEX_BALL,
+        STOP_INDEX
 
+    }
     private LaunchState launchState;
+    private IndexState indexState;
 
     // Setup a variable for each drive wheel to save power level for telemetry
     double frontLeftPower;
@@ -119,9 +129,11 @@ public class teleOpTwo extends OpMode {
     /*
      * Code to run ONCE when the driver hits INIT
      */
+
     @Override
     public void init() {
         launchState = LaunchState.IDLE;
+        indexState = IndexState.IDLE_INDEX;
 
         /*
          * Initialize the hardware variables. Note that the strings used here as parameters
@@ -143,6 +155,7 @@ public class teleOpTwo extends OpMode {
          * Note: The settings here assume direct drive on left and right wheels. Gear
          * Reduction or 90 Deg drives may require direction flips
          */
+
         frontLeftDrive.setDirection(DcMotor.Direction.REVERSE);
         backLeftDrive.setDirection(DcMotor.Direction.REVERSE);
         frontRightDrive.setDirection(DcMotor.Direction.FORWARD);
@@ -157,6 +170,7 @@ public class teleOpTwo extends OpMode {
          * into the port right beside the motor itself. And that the motors polarity is consistent
          * through any wiring.
          */
+
         frontLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         frontRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         backRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -169,6 +183,7 @@ public class teleOpTwo extends OpMode {
          * slow down much faster when it is coasting. This creates a much more controllable
          * drivetrain. As the robot stops much quicker.
          */
+
         frontLeftDrive.setZeroPowerBehavior(BRAKE);
         frontRightDrive.setZeroPowerBehavior(BRAKE);
         backLeftDrive.setZeroPowerBehavior(BRAKE);
@@ -179,6 +194,7 @@ public class teleOpTwo extends OpMode {
         /*
          * set Feeders to an initial value to initialize the servo controller
          */
+
         leftFeeder.setPower(STOP_SPEED);
         rightFeeder.setPower(STOP_SPEED);
 
@@ -188,11 +204,13 @@ public class teleOpTwo extends OpMode {
          * Much like our drivetrain motors, we set the left feeder servo to reverse so that they
          * both work to feed the ball into the robot.
          */
+
         rightFeeder.setDirection(DcMotorSimple.Direction.REVERSE);
 
         /*
          * Tell the driver that initialization is complete.
          */
+
         telemetry.addData("Status", "Initialized");
     }
 
@@ -224,7 +242,7 @@ public class teleOpTwo extends OpMode {
          * both motors work to rotate the robot. Combinations of these inputs can be used to create
          * more complex maneuvers.
          */
-       //arcadeDrive(-gamepad1.left_stick_y, gamepad1.right_stick_x);
+        //arcadeDrive(-gamepad1.left_stick_y, gamepad1.right_stick_x);
         mecanumDrive(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
 
         /*
@@ -241,6 +259,7 @@ public class teleOpTwo extends OpMode {
          * Now we call our "Launch" function.
          */
         launch(gamepad2.rightBumperWasPressed());
+        index(gamepad2.leftBumperWasPressed());
 
         /*
          * Show the state and motor powers
@@ -282,21 +301,25 @@ public class teleOpTwo extends OpMode {
         frontRightDrive.setPower(frontRightPower);
         backRightDrive.setPower(backRightPower);
     }
-
+/*
     void arcadeDrive(double forward, double rotate) {
         frontLeftPower = forward + rotate;
         backLeftPower = forward + rotate;
         frontRightPower = forward - rotate;
         backRightPower = forward - rotate;
 
-        /*
+*/
+ /*
          * Send calculated power to wheels
          */
+         /*
         frontLeftDrive.setPower(frontLeftPower);
         backLeftDrive.setPower(backLeftPower);
         frontRightDrive.setPower(frontRightPower);
         backRightDrive.setPower(backRightPower);
     }
+    */
+
 
     void launch(boolean shotRequested) {
         switch (launchState) {
@@ -320,6 +343,35 @@ public class teleOpTwo extends OpMode {
             case LAUNCHING:
                 if (feederTimer.seconds() > FEED_TIME_SECONDS) {
                     launchState = LaunchState.IDLE;
+                    leftFeeder.setPower(STOP_SPEED);
+                    rightFeeder.setPower(STOP_SPEED);
+                }
+                break;
+            }
+        }
+        //Here is the indexing part of the TeleOp
+    void index(boolean indexRequested) {
+        switch (indexState) {
+            case IDLE_INDEX:
+                if (indexRequested) {
+                    indexState = IndexState.START_INDEX;
+                }
+                break;
+            case START_INDEX:
+                launcher.setVelocity(LAUNCHER_INDEX_TARGET_VELOCITY);
+                if (launcher.getVelocity() > LAUNCHER_INDEX_MIN_VELOCITY) {
+                    indexState = IndexState.INDEX_BALL;
+                }
+                break;
+            case INDEX_BALL:
+                leftFeeder.setPower(FULL_SPEED);
+                rightFeeder.setPower(FULL_SPEED);
+                feederTimer.reset();
+                indexState = IndexState.STOP_INDEX;
+                break;
+            case STOP_INDEX:
+                if (feederTimer.seconds() > FEED_TIME_SECONDS) {
+                    indexState = IndexState.IDLE_INDEX;
                     leftFeeder.setPower(STOP_SPEED);
                     rightFeeder.setPower(STOP_SPEED);
                 }
