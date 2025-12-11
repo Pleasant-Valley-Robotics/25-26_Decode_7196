@@ -18,9 +18,6 @@ public class Camera {
     public Camera (HardwareMap hardwareMap) {
         initAprilTag(hardwareMap);
     }
-
-
-
     public int findShotsToCycle() {
         int shotsToCycle = 0;
         List<AprilTagDetection> currentDetections = aprilTag.getDetections();
