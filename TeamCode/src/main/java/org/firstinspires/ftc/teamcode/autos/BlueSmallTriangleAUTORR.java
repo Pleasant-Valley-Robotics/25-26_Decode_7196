@@ -38,22 +38,15 @@ public class BlueSmallTriangleAUTORR extends LinearOpMode {
                 .strafeToLinearHeading(shootPosition, Math.toRadians(-129.5463))
                 .waitSeconds(1.0);
 
-
         Vector2d endingPosition = new Vector2d(-61.1642, -11.5718);
 
-        //Action trajectoryActionCloseOut = tab1.endTrajectory().fresh()
-        //        .strafeTo(new Vector2d(48, 12))
-        //         .build();
-
-
         while (!isStopRequested() && !opModeIsActive()) {
+            //add anything for during initialization
         }
 
         waitForStart();
 
         if (isStopRequested()) return;
-
-
 
         Actions.runBlocking(
                 new SequentialAction(

@@ -38,23 +38,16 @@ public class BlueGoalAUTORR extends LinearOpMode {
                 .strafeToLinearHeading(shootPosition, Math.toRadians(-127.5463))
                 .waitSeconds(1.0);
 
-
         Vector2d endingPosition = new Vector2d(-62.2683, -14.212);
 
-        //Action trajectoryActionCloseOut = tab1.endTrajectory().fresh()
-        //        .strafeTo(new Vector2d(48, 12))
-        //         .build();
-
-
         while (!isStopRequested() && !opModeIsActive()) {
+            //add anything for during initialization
         }
 
         waitForStart();
 
         if (isStopRequested()) return;
-
-
-
+        
         Actions.runBlocking(
                 new SequentialAction(
                         goToShoot.build(),

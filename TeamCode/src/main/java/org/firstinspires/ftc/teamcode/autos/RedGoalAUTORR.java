@@ -31,7 +31,6 @@ public class RedGoalAUTORR extends LinearOpMode {
         Launcher launcher = new Launcher(hardwareMap);
         Camera camera = new Camera(hardwareMap);
 
-
 // This is supposed to go to the coordinates of the shooting distance (-30.6209, 21.5313) with heading 129.5463
 //This is the coordinates for the ending position of Goal AUTO (-61.7134, 17.4823) with heading -177.7059
         Vector2d shootPosition = new Vector2d(-30.6209, 21.5313);
@@ -42,19 +41,12 @@ public class RedGoalAUTORR extends LinearOpMode {
 
         Vector2d endingPosition = new Vector2d(-61.6131, 11.5718);
 
-        //Action trajectoryActionCloseOut = tab1.endTrajectory().fresh()
-        //        .strafeTo(new Vector2d(48, 12))
-        //         .build();
-
-
         while (!isStopRequested() && !opModeIsActive()) {
+            //add anything for during initialization
         }
-
         waitForStart();
 
         if (isStopRequested()) return;
-
-
 
         Actions.runBlocking(
                 new SequentialAction(
