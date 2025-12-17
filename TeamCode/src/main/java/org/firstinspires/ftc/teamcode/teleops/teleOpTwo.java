@@ -63,6 +63,7 @@ public class teleOpTwo extends OpMode {
     final double FEED_TIME_SECONDS = 0.60; //The feeder servos run this long when a shot is requested.
     final double STOP_SPEED = 0.0; //We send this power to the servos when we want them to stop.
     final double FULL_SPEED = 1.0;
+    final double TURN_SPEED = 0.05;
 
     /*
      * When we control our launcher motor, we are using encoders. These allow the control system
@@ -243,14 +244,20 @@ public class teleOpTwo extends OpMode {
          * more complex maneuvers.
          */
         //arcadeDrive(-gamepad1.left_stick_y, gamepad1.right_stick_x);
-        mecanumDrive(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
+        //mecanumDrive(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
+
+        double driveMultiplier = gamepad1.right_bumper ? TURN_SPEED : FULL_SPEED;
+
+        mecanumDrive(
+                -gamepad1.left_stick_y * driveMultiplier, gamepad1.left_stick_x * driveMultiplier, gamepad1.right_stick_x * driveMultiplier
+        );
 
         /*
          * Here we give the user control of the speed of the launcher motor without automatically
          * queuing a shot.
          */
         if (gamepad1.y) {
-            launcher.setVelocity(LAUNCHER_TARGET_VELOCITY);
+
         } else if (gamepad2.b) { // stop flywheel
             launcher.setVelocity(STOP_SPEED);
         }
