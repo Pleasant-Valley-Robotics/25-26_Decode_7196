@@ -15,7 +15,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Launcher;
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive;
 
 @Config
-@Autonomous(name = "RedGoalAUTORR", group = "Autonomous")
+@Autonomous(name = "RedGoalDetourAUTORR", group = "Autonomous")
 public class RedGoalDetourAUTORR extends LinearOpMode {
     @Override
     public void runOpMode() {
@@ -32,7 +32,7 @@ public class RedGoalDetourAUTORR extends LinearOpMode {
                 .waitSeconds(1.0);
 
 
-        Vector2d endingPosition = new Vector2d(-61.6131, 11.5718);
+        Vector2d endingPosition = new Vector2d(-62.0308, 12.9117);
 
         while (!isStopRequested() && !opModeIsActive()) {
             //add anything for during initialization
@@ -54,7 +54,7 @@ public class RedGoalDetourAUTORR extends LinearOpMode {
                 )
         );
         TrajectoryActionBuilder goToEnd = drive.actionBuilder(drive.localizer.getPose())
-                .strafeToLinearHeading(endingPosition, Math.toRadians(-177.7059))
+                .strafeToLinearHeading(endingPosition, Math.toRadians(90.202))
                 .waitSeconds(1.0);
         Actions.runBlocking(
                 goToEnd.build()

@@ -31,7 +31,7 @@ public class BlueSmallTriangleDetourAUTORR extends LinearOpMode {
                 .strafeToLinearHeading(shootPosition, Math.toRadians(-90.1629))
                 .waitSeconds(1.0);
 
-        Vector2d endingPosition = new Vector2d(-61.1642, -11.5718);
+        Vector2d endingPosition = new Vector2d(-62.0308, -12.9117);
 
         while (!isStopRequested() && !opModeIsActive()) {
             //add anything for during initialization
@@ -54,7 +54,7 @@ public class BlueSmallTriangleDetourAUTORR extends LinearOpMode {
                 )
         );
         TrajectoryActionBuilder goToEnd = drive.actionBuilder(drive.localizer.getPose())
-                .strafeToLinearHeading(endingPosition, Math.toRadians(-178.1502))
+                .strafeToLinearHeading(endingPosition, Math.toRadians(-90.202))
                 .waitSeconds(1.0);
         Actions.runBlocking(
                 goToEnd.build()
