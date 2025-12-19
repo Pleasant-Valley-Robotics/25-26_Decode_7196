@@ -21,6 +21,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.subsystems.*;
 import org.firstinspires.ftc.teamcode.subsystems.Camera;
+import org.firstinspires.ftc.teamcode.utility.Storage;
 
 @Config
 @Autonomous(name = "RedGoalAUTORR", group = "Autonomous")
@@ -82,5 +83,6 @@ public class RedGoalAUTORR extends LinearOpMode {
         Actions.runBlocking(
                 goToEnd.build()
         );
+        Storage.pose = drive.localizer.getPose();
     }
 }

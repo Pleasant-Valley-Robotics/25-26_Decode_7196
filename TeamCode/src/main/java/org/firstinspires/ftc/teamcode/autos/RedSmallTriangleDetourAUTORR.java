@@ -14,6 +14,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Camera;
 import org.firstinspires.ftc.teamcode.subsystems.Launcher;
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive;
 import org.firstinspires.ftc.teamcode.subsystems.Camera;
+import org.firstinspires.ftc.teamcode.utility.Storage;
 
 @Config
 @Autonomous(name = "RedSmallTriangleDetourAUTORR", group = "Autonomous")
@@ -76,5 +77,6 @@ public class RedSmallTriangleDetourAUTORR extends LinearOpMode {
         Actions.runBlocking(
                 goToEnd.build()
         );
+        Storage.pose = drive.localizer.getPose();
     }
 }

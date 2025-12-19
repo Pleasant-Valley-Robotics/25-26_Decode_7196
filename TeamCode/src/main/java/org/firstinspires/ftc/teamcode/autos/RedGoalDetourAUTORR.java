@@ -14,6 +14,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Camera;
 import org.firstinspires.ftc.teamcode.subsystems.Launcher;
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive;
 import org.firstinspires.ftc.teamcode.subsystems.Camera;
+import org.firstinspires.ftc.teamcode.utility.Storage;
 
 @Config
 @Autonomous(name = "RedGoalDetourAUTORR", group = "Autonomous")
@@ -75,5 +76,6 @@ public class RedGoalDetourAUTORR extends LinearOpMode {
         Actions.runBlocking(
                 goToEnd.build()
         );
+        Storage.pose = drive.localizer.getPose();
     }
 }
