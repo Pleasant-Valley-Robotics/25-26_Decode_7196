@@ -20,6 +20,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.subsystems.*;
+import org.firstinspires.ftc.teamcode.subsystems.Camera;
 
 @Config
 @Autonomous(name = "RedSmallTriangleAUTORR", group = "Autonomous")
@@ -42,11 +43,26 @@ public class RedSmallTriangleAUTORR extends LinearOpMode {
 
         while (!isStopRequested() && !opModeIsActive()) {
         //add anything for during initialization
+            telemetry.addData("Shots To Cycle", camera.findShotsToCycle());
+            telemetry.update();
         }
 
         waitForStart();
 
         if (isStopRequested()) return;
+
+        telemetry.addData("Shots To Cycle", camera.findShotsToCycle());
+        telemetry.update();
+        for (int ShotsToCycle = camera.findShotsToCycle(); ShotsToCycle>0; ShotsToCycle--)
+        {
+            Actions.runBlocking(
+                    new SequentialAction(
+                            launcher.IndexBall(),
+                            new SleepAction(1.0)
+                    )
+            );
+        } // end indexing
+
 
         Actions.runBlocking(
                 new SequentialAction(

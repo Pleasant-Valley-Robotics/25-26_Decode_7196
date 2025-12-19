@@ -42,6 +42,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import org.firstinspires.ftc.teamcode.subsystems.Camera;
 
 /*
  * This file includes a teleop (driver-controlled) file for the goBILDA® StarterBot for the
@@ -85,6 +86,7 @@ public class teleOpOne extends OpMode {
     private DcMotorEx launcher = null;
     private CRServo leftFeeder = null;
     private CRServo rightFeeder = null;
+    private Camera camera = null;
 
     ElapsedTime feederTimer = new ElapsedTime();
 
@@ -134,6 +136,7 @@ public class teleOpOne extends OpMode {
     @Override
     public void init() {
         launchState = LaunchState.IDLE;
+        indexState = IndexState.IDLE_INDEX;
 
         /*
          * Initialize the hardware variables. Note that the strings used here as parameters
@@ -147,7 +150,7 @@ public class teleOpOne extends OpMode {
         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
         leftFeeder = hardwareMap.get(CRServo.class, "leftFeeder");
         rightFeeder = hardwareMap.get(CRServo.class, "rightFeeder");
-
+        camera = new Camera(hardwareMap);
         /*
          * To drive forward, most robots need the motor on one side to be reversed,
          * because the axles point in opposite directions. Pushing the left stick forward
@@ -266,6 +269,7 @@ public class teleOpOne extends OpMode {
         telemetry.addData("State", launchState);
         telemetry.addData("Motors", "left (%.2f), right (%.2f)", frontLeftPower, backLeftPower, frontRightPower, backRightPower);
         telemetry.addData("motorSpeed", launcher.getVelocity());
+        telemetry.addData("Shots To Cycle", camera.findShotsToCycle());
         telemetry.update();
     }
 

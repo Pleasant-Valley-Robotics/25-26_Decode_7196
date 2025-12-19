@@ -75,4 +75,49 @@ public class Launcher {
     {
         return new ShootBall();
     }
-}
+
+public class IndexBall implements Action {
+    private boolean initialized = false;
+    private boolean startedShooting = false;
+
+    @Override
+    public boolean run(@NonNull TelemetryPacket packet) {
+        if (!initialized) {
+            initialized = true;
+            startedShooting = false;
+            launcher.setVelocity(0.0);
+            leftFeeder.setPower(0.0);
+            rightFeeder.setPower(0.0);
+            feederTimer.reset();
+            feederTimer.startTime();
+        }
+        double vel = launcher.getVelocity();
+        packet.put("launcherVelocity", vel);
+        if (vel > 575.0) {
+            double tim = feederTimer.seconds();
+            packet.put("feederTimer", tim);
+            launcher.setVelocity(575.0);
+            leftFeeder.setPower(1.0);
+            rightFeeder.setPower(1.0);
+            startedShooting = true;
+
+        } else if (!startedShooting) {
+            launcher.setVelocity(575.0);
+            feederTimer.reset();
+            feederTimer.startTime();
+        }
+        if (feederTimer.seconds() > 0.50) {
+            leftFeeder.setPower(0.0);
+            rightFeeder.setPower(0.0);
+            launcher.setVelocity(0.0);
+            return false;
+        }
+        return true;
+    }
+}// end of index ball class
+public Action IndexBall()
+{
+    return new IndexBall();
+}// end of index ball action
+
+} //end of launcher class

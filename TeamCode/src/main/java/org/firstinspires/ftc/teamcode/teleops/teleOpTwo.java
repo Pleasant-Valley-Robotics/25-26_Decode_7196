@@ -34,6 +34,7 @@ package org.firstinspires.ftc.teamcode.teleops;
 
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
 
+import com.acmerobotics.roadrunner.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -42,6 +43,14 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.teamcode.autos.RedGoalAUTORR;
+import org.firstinspires.ftc.teamcode.subsystems.Launcher;
+import org.firstinspires.ftc.teamcode.subsystems.Camera;
+import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive;
+import org.firstinspires.ftc.teamcode.roadrunner_essentials.*;
+import org.firstinspires.ftc.teamcode.utility.Storage;
+import org.firstinspires.ftc.vision.apriltag.AprilTagLibrary;
 
 /*
  * This file includes a teleop (driver-controlled) file for the goBILDA® StarterBot for the
@@ -65,6 +74,10 @@ public class teleOpTwo extends OpMode {
     final double FULL_SPEED = 1.0;
     final double TURN_SPEED = 0.05;
 
+    final double RED_GOAL_X = -72.0;
+    final double RED_GOAL_Y = 72.0;
+
+
     /*
      * When we control our launcher motor, we are using encoders. These allow the control system
      * to read the current speed of the motor and apply more or less power to keep it at a constant
@@ -74,8 +87,8 @@ public class teleOpTwo extends OpMode {
     final double LAUNCHER_TARGET_VELOCITY = 1250;
     final double LAUNCHER_MIN_VELOCITY = 1050;
 
-    final double LAUNCHER_INDEX_TARGET_VELOCITY = 612.5;
-    final double LAUNCHER_INDEX_MIN_VELOCITY = 512.5;
+    final double LAUNCHER_INDEX_TARGET_VELOCITY = 615.0;
+    final double LAUNCHER_INDEX_MIN_VELOCITY = 600.0;
 
     // Declare OpMode members.
     private DcMotor frontLeftDrive = null;
@@ -125,7 +138,7 @@ public class teleOpTwo extends OpMode {
     double backLeftPower;
     double frontRightPower;
     double backRightPower;
-
+    public MecanumDrive mecanumDrive;
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -148,6 +161,9 @@ public class teleOpTwo extends OpMode {
         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
         leftFeeder = hardwareMap.get(CRServo.class, "leftFeeder");
         rightFeeder = hardwareMap.get(CRServo.class, "rightFeeder");
+        Camera camera = new Camera(hardwareMap);
+        mecanumDrive = new MecanumDrive(hardwareMap, Storage.pose);
+
 
         /*
          * To drive forward, most robots need the motor on one side to be reversed,
@@ -271,11 +287,15 @@ public class teleOpTwo extends OpMode {
         /*
          * Show the state and motor powers
          */
-        telemetry.addData("State", launchState);
-        telemetry.addData("Motors", "left (%.2f), right (%.2f)", frontLeftPower, backLeftPower, frontRightPower, backRightPower);
-        telemetry.addData("motorSpeed", launcher.getVelocity());
+        //telemetry.addData("State", launchState);
+        //telemetry.addData("Motors", "left (%.2f), right (%.2f)", frontLeftPower, backLeftPower, frontRightPower, backRightPower);
+        //telemetry.addData("motorSpeed", launcher.getVelocity());
+        telemetry.addData("X", mecanumDrive.localizer.getPose().position.x);
+        telemetry.addData("Y", mecanumDrive.localizer.getPose().position.y);
+        telemetry.addData("Heading", mecanumDrive.localizer.getPose().heading.real*180.0);
+        double GoalHeading = (Math.atan2((RED_GOAL_Y - mecanumDrive.localizer.getPose().position.y), RED_GOAL_X - mecanumDrive.localizer.getPose().position.x)*(180.0/Math.PI));
+        telemetry.addData("Goal Heading", GoalHeading);
         telemetry.update();
-
     }
 
     /*
@@ -284,7 +304,6 @@ public class teleOpTwo extends OpMode {
     @Override
     public void stop() {
     }
-
     void mecanumDrive(double axial, double lateral, double yaw) {
         double max = 0.0;
         double frontLeftPower = axial + lateral + yaw;

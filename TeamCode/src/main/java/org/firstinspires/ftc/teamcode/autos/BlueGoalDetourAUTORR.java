@@ -13,9 +13,10 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.teamcode.subsystems.Camera;
 import org.firstinspires.ftc.teamcode.subsystems.Launcher;
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive;
+import org.firstinspires.ftc.teamcode.subsystems.Camera;
 
 @Config
-@Autonomous(name = "BlueGoalAUTORR", group = "Autonomous")
+@Autonomous(name = "BlueGoalDetourAUTORR", group = "Autonomous")
 public class BlueGoalDetourAUTORR extends LinearOpMode {
     @Override
     public void runOpMode() {
@@ -35,11 +36,26 @@ public class BlueGoalDetourAUTORR extends LinearOpMode {
 
         while (!isStopRequested() && !opModeIsActive()) {
             //add anything for during initialization
+            telemetry.addData("Shots To Cycle", camera.findShotsToCycle());
+            telemetry.update();
         }
 
         waitForStart();
 
         if (isStopRequested()) return;
+
+        telemetry.addData("Shots To Cycle", camera.findShotsToCycle());
+        telemetry.update();
+        for (int ShotsToCycle = camera.findShotsToCycle(); ShotsToCycle>0; ShotsToCycle--)
+        {
+            Actions.runBlocking(
+                    new SequentialAction(
+                            launcher.IndexBall(),
+                            new SleepAction(1.0)
+                    )
+            );
+        } // end indexing
+
         
         Actions.runBlocking(
                 new SequentialAction(
