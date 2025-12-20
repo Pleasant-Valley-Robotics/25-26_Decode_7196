@@ -37,6 +37,11 @@ public class BlueGoalDetourAUTORR extends LinearOpMode {
 
         while (!isStopRequested() && !opModeIsActive()) {
             //add anything for during initialization
+            if (gamepad1.b) {
+                Storage.alliance = Storage.Alliance.RED;
+            } else if (gamepad1.x) {
+                Storage.alliance = Storage.Alliance.BLUE;
+            }
             telemetry.addData("Shots To Cycle", camera.findShotsToCycle());
             telemetry.update();
         }
@@ -52,7 +57,7 @@ public class BlueGoalDetourAUTORR extends LinearOpMode {
             Actions.runBlocking(
                     new SequentialAction(
                             launcher.IndexBall(),
-                            new SleepAction(1.0)
+                            new SleepAction(1.5)
                     )
             );
         } // end indexing

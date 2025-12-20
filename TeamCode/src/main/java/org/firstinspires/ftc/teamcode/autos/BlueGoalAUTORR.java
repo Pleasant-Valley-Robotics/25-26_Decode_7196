@@ -58,11 +58,10 @@ public class BlueGoalAUTORR extends LinearOpMode {
             Actions.runBlocking(
                     new SequentialAction(
                             launcher.IndexBall(),
-                            new SleepAction(1.0)
+                            new SleepAction(1.5)
                     )
             );
         } // end indexing
-
 
         Actions.runBlocking(
                 new SequentialAction(

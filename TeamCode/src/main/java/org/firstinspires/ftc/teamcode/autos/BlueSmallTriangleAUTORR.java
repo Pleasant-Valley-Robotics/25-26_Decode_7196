@@ -59,7 +59,7 @@ public class BlueSmallTriangleAUTORR extends LinearOpMode {
             Actions.runBlocking(
                     new SequentialAction(
                             launcher.IndexBall(),
-                            new SleepAction(1.0)
+                            new SleepAction(1.5)
                     )
             );
         } // end indexing

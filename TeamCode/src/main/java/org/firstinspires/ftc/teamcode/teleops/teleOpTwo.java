@@ -34,6 +34,8 @@ package org.firstinspires.ftc.teamcode.teleops;
 
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
 
+import static org.firstinspires.ftc.teamcode.utility.Storage.alliance;
+
 import com.acmerobotics.roadrunner.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -43,6 +45,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.autos.RedGoalAUTORR;
 import org.firstinspires.ftc.teamcode.subsystems.Launcher;
@@ -74,9 +77,8 @@ public class teleOpTwo extends OpMode {
     final double FULL_SPEED = 1.0;
     final double TURN_SPEED = 0.05;
 
-    final double RED_GOAL_X = -72.0;
-    final double RED_GOAL_Y = 72.0;
-
+    double GOAL_X = -72.0;
+    double GOAL_Y = 72.0;
 
     /*
      * When we control our launcher motor, we are using encoders. These allow the control system
@@ -139,6 +141,9 @@ public class teleOpTwo extends OpMode {
     double frontRightPower;
     double backRightPower;
     public MecanumDrive mecanumDrive;
+
+    boolean autoAim = false;
+    double P_autoAim = 1.0/30.0;
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -236,6 +241,15 @@ public class teleOpTwo extends OpMode {
      */
     @Override
     public void init_loop() {
+        if (gamepad1.b) {
+            alliance = Storage.Alliance.RED;
+        } else if (gamepad1.x) {
+            alliance = Storage.Alliance.BLUE;
+        }
+
+        telemetry.addData("Press X", "for BLUE");
+        telemetry.addData("Press B", "for RED");
+        telemetry.addData("Selected Alliance", alliance);
     }
 
     /*
@@ -250,6 +264,7 @@ public class teleOpTwo extends OpMode {
      */
     @Override
     public void loop() {
+        mecanumDrive.updatePoseEstimate();
         /*
          * Here we call a function called arcadeDrive. The arcadeDrive function takes the input from
          * the joysticks, and applies power to the left and right drive motor to move the robot
@@ -261,22 +276,46 @@ public class teleOpTwo extends OpMode {
          */
         //arcadeDrive(-gamepad1.left_stick_y, gamepad1.right_stick_x);
         //mecanumDrive(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
-
+        //This is where we add the slow movement option for any precise movements on the field
         double driveMultiplier = gamepad1.right_bumper ? TURN_SPEED : FULL_SPEED;
 
-        mecanumDrive(
-                -gamepad1.left_stick_y * driveMultiplier, gamepad1.left_stick_x * driveMultiplier, gamepad1.right_stick_x * driveMultiplier
-        );
+        if(alliance == Storage.Alliance.BLUE) {
+            GOAL_Y = -72.0;
+        }
+        else if(alliance == Storage.Alliance.RED) {
+            GOAL_Y = 72.0;
+        }
+
+        double GoalHeading = (Math.atan2((GOAL_Y - mecanumDrive.localizer.getPose().position.y), GOAL_X - mecanumDrive.localizer.getPose().position.x) * (180.0/Math.PI));
+        double AutoAimError = GoalHeading - (mecanumDrive.localizer.getPose().heading.toDouble() * (180.0/Math.PI));
+        while (AutoAimError > 180) AutoAimError -= 360;
+        while (AutoAimError <= -180) AutoAimError += 360;
+
+        double AutoAimPower = AutoAimError * -P_autoAim;
+
+        if (gamepad1.xWasPressed()) {
+            autoAim = !autoAim;
+        }
+
+        if (gamepad1.bWasPressed()) {
+            mecanumDrive.localizer.setPose(new Pose2d(0.0,0.0, 0.0));
+        }
+
+
+
+        if (!autoAim) {
+            mecanumDrive(
+                    -gamepad1.left_stick_y * driveMultiplier, gamepad1.left_stick_x * driveMultiplier, gamepad1.right_stick_x * driveMultiplier
+            );
+        }
+        else {
+            mecanumDrive(-gamepad1.left_stick_y * driveMultiplier, gamepad1.left_stick_x * driveMultiplier, AutoAimPower);
+        }
 
         /*
          * Here we give the user control of the speed of the launcher motor without automatically
          * queuing a shot.
          */
-        if (gamepad1.y) {
-
-        } else if (gamepad2.b) { // stop flywheel
-            launcher.setVelocity(STOP_SPEED);
-        }
 
         /*
          * Now we call our "Launch" function.
@@ -292,9 +331,12 @@ public class teleOpTwo extends OpMode {
         //telemetry.addData("motorSpeed", launcher.getVelocity());
         telemetry.addData("X", mecanumDrive.localizer.getPose().position.x);
         telemetry.addData("Y", mecanumDrive.localizer.getPose().position.y);
-        telemetry.addData("Heading", mecanumDrive.localizer.getPose().heading.real*180.0);
-        double GoalHeading = (Math.atan2((RED_GOAL_Y - mecanumDrive.localizer.getPose().position.y), RED_GOAL_X - mecanumDrive.localizer.getPose().position.x)*(180.0/Math.PI));
+        telemetry.addData("Heading", mecanumDrive.localizer.getPose().heading.toDouble() * (180.0/Math.PI));
         telemetry.addData("Goal Heading", GoalHeading);
+        telemetry.addData("Auto Aim Status", autoAim);
+        telemetry.addData("Auto Aim Error", AutoAimError);
+        telemetry.addData("Auto Aim Power", AutoAimPower);
+
         telemetry.update();
     }
 
