@@ -80,13 +80,16 @@ public class teleOpTwo extends OpMode {
     double GOAL_X = -72.0;
     double GOAL_Y = 72.0;
 
+
+
     /*
      * When we control our launcher motor, we are using encoders. These allow the control system
      * to read the current speed of the motor and apply more or less power to keep it at a constant
      * velocity. Here we are setting the target, and minimum velocity that the launcher should run
      * at. The minimum velocity is a threshold for determining when to fire.
      */
-    final double LAUNCHER_TARGET_VELOCITY = 1250;
+    final double HIGH_LAUNCH = 1650;
+    final double LAUNCHER_TARGET_VELOCITY = 1200;
     final double LAUNCHER_MIN_VELOCITY = 1050;
 
     final double LAUNCHER_INDEX_TARGET_VELOCITY = 615.0;
@@ -141,6 +144,7 @@ public class teleOpTwo extends OpMode {
     double frontRightPower;
     double backRightPower;
     public MecanumDrive mecanumDrive;
+    double selectedLaunchVelocity = 0;
 
     boolean autoAim = false;
     double P_autoAim = 1.0/30.0;
@@ -285,6 +289,12 @@ public class teleOpTwo extends OpMode {
         else if(alliance == Storage.Alliance.RED) {
             GOAL_Y = 72.0;
         }
+// these are the values to calculate the velocity
+        double X_DISTANCE = GOAL_X - mecanumDrive.localizer.getPose().position.x;
+        double Y_DISTANCE = GOAL_Y - mecanumDrive.localizer.getPose().position.y;
+
+        double GOAL_DISTANCE = Math.sqrt((X_DISTANCE * X_DISTANCE) + (Y_DISTANCE * Y_DISTANCE));
+        double targetVelocity = 5.1059 * GOAL_DISTANCE;
 
         double GoalHeading = (Math.atan2((GOAL_Y - mecanumDrive.localizer.getPose().position.y), GOAL_X - mecanumDrive.localizer.getPose().position.x) * (180.0/Math.PI));
         double AutoAimError = GoalHeading - (mecanumDrive.localizer.getPose().heading.toDouble() * (180.0/Math.PI));
@@ -300,6 +310,18 @@ public class teleOpTwo extends OpMode {
         if (gamepad1.bWasPressed()) {
             mecanumDrive.localizer.setPose(new Pose2d(0.0,0.0, 0.0));
         }
+
+        if(gamepad2.y) {
+            selectedLaunchVelocity = HIGH_LAUNCH;
+        } else if (gamepad2.a) {
+            selectedLaunchVelocity = LAUNCHER_TARGET_VELOCITY;
+        }
+
+        if (gamepad2.b) {
+            launcher.setVelocity(STOP_SPEED);
+        }
+
+        launcher.setVelocity(selectedLaunchVelocity);
 
 
 
@@ -336,7 +358,8 @@ public class teleOpTwo extends OpMode {
         telemetry.addData("Auto Aim Status", autoAim);
         telemetry.addData("Auto Aim Error", AutoAimError);
         telemetry.addData("Auto Aim Power", AutoAimPower);
-
+        telemetry.addData("Distance from Goal", GOAL_DISTANCE);
+        telemetry.addData("Velocity", launcher.getVelocity());
         telemetry.update();
     }
 
