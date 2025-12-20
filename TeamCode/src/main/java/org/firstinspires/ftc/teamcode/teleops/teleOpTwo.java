@@ -294,8 +294,9 @@ public class teleOpTwo extends OpMode {
         double Y_DISTANCE = GOAL_Y - mecanumDrive.localizer.getPose().position.y;
 
         double GOAL_DISTANCE = Math.sqrt((X_DISTANCE * X_DISTANCE) + (Y_DISTANCE * Y_DISTANCE));
-        double targetVelocity = 5.1059 * GOAL_DISTANCE;
+        double targetVelocity = 5.1059 * GOAL_DISTANCE + (905.26);
 
+// the values of the auto lock part of the teleop
         double GoalHeading = (Math.atan2((GOAL_Y - mecanumDrive.localizer.getPose().position.y), GOAL_X - mecanumDrive.localizer.getPose().position.x) * (180.0/Math.PI));
         double AutoAimError = GoalHeading - (mecanumDrive.localizer.getPose().heading.toDouble() * (180.0/Math.PI));
         while (AutoAimError > 180) AutoAimError -= 360;
@@ -315,6 +316,9 @@ public class teleOpTwo extends OpMode {
             selectedLaunchVelocity = HIGH_LAUNCH;
         } else if (gamepad2.a) {
             selectedLaunchVelocity = LAUNCHER_TARGET_VELOCITY;
+        }
+        else if (gamepad2.x) {
+            selectedLaunchVelocity = targetVelocity;
         }
 
         if (gamepad2.b) {
@@ -360,6 +364,7 @@ public class teleOpTwo extends OpMode {
         telemetry.addData("Auto Aim Power", AutoAimPower);
         telemetry.addData("Distance from Goal", GOAL_DISTANCE);
         telemetry.addData("Velocity", launcher.getVelocity());
+        telemetry.addData("Set Launcher Velocity", selectedLaunchVelocity);
         telemetry.update();
     }
 
