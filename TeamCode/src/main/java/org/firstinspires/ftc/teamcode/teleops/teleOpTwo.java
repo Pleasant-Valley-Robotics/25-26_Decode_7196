@@ -95,6 +95,7 @@ public class teleOpTwo extends OpMode {
     private DcMotor backLeftDrive = null;
     private DcMotor frontRightDrive = null;
     private DcMotor backRightDrive = null;
+    private DcMotor intake = null;
     private DcMotorEx launcher = null;
     private CRServo leftFeeder = null;
     private CRServo rightFeeder = null;
@@ -159,6 +160,7 @@ public class teleOpTwo extends OpMode {
         frontRightDrive = hardwareMap.get(DcMotor.class, "rightFront");
         backRightDrive = hardwareMap.get(DcMotor.class, "rightBack");
         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
+        intake = hardwareMap.get(DcMotor.class, "intake");
         leftFeeder = hardwareMap.get(CRServo.class, "leftFeeder");
         rightFeeder = hardwareMap.get(CRServo.class, "rightFeeder");
         Camera camera = new Camera(hardwareMap);
@@ -179,6 +181,7 @@ public class teleOpTwo extends OpMode {
         backRightDrive.setDirection(DcMotor.Direction.FORWARD);
 
         launcher.setDirection(DcMotor.Direction.FORWARD);
+        intake.setDirection(DcMotorSimple.Direction.FORWARD);
 
         /*
          * Here we set our launcher to the RUN_USING_ENCODER run mode.
@@ -194,6 +197,7 @@ public class teleOpTwo extends OpMode {
         backLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        intake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         /*
          * Setting zeroPowerBehavior to BRAKE enables a "brake mode". This causes the motor to
@@ -207,6 +211,7 @@ public class teleOpTwo extends OpMode {
         backRightDrive.setZeroPowerBehavior(BRAKE);
 
         launcher.setZeroPowerBehavior(BRAKE);
+        intake.setZeroPowerBehavior(BRAKE);
 
         /*
          * set Feeders to an initial value to initialize the servo controller
@@ -268,6 +273,10 @@ public class teleOpTwo extends OpMode {
                 -gamepad1.left_stick_y * driveMultiplier, gamepad1.left_stick_x * driveMultiplier, gamepad1.right_stick_x * driveMultiplier
         );
 
+        double intakePower = -gamepad2.left_stick_y;
+
+
+
         /*
          * Here we give the user control of the speed of the launcher motor without automatically
          * queuing a shot.
@@ -283,6 +292,7 @@ public class teleOpTwo extends OpMode {
          */
         launch(gamepad2.rightBumperWasPressed());
         index(gamepad2.leftBumperWasPressed());
+        intake.setPower(intakePower);
 
         /*
          * Show the state and motor powers
@@ -295,6 +305,7 @@ public class teleOpTwo extends OpMode {
         telemetry.addData("Heading", mecanumDrive.localizer.getPose().heading.real*180.0);
         double GoalHeading = (Math.atan2((RED_GOAL_Y - mecanumDrive.localizer.getPose().position.y), RED_GOAL_X - mecanumDrive.localizer.getPose().position.x)*(180.0/Math.PI));
         telemetry.addData("Goal Heading", GoalHeading);
+        telemetry.addData("intakePower: ", intakePower);
         telemetry.update();
     }
 
