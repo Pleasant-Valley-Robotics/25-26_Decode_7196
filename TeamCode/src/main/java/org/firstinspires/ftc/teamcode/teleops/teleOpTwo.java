@@ -48,6 +48,10 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 
+import org.firstinspires.ftc.robotcontroller.external.samples.SampleRevBlinkinLedDriver;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.internal.system.Deadline;
+
 import org.firstinspires.ftc.teamcode.autos.RedGoalAUTORR;
 import org.firstinspires.ftc.teamcode.subsystems.Launcher;
 import org.firstinspires.ftc.teamcode.subsystems.Camera;
@@ -55,6 +59,7 @@ import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive;
 import org.firstinspires.ftc.teamcode.roadrunner_essentials.*;
 import org.firstinspires.ftc.teamcode.utility.Storage;
 import org.firstinspires.ftc.vision.apriltag.AprilTagLibrary;
+
 
 /*
  * This file includes a teleop (driver-controlled) file for the goBILDA® StarterBot for the
@@ -107,6 +112,14 @@ public class teleOpTwo extends OpMode {
     private CRServo leftFeeder = null;
     private CRServo rightFeeder = null;
 
+    RevBlinkinLedDriver blinkinLedDriver;
+    RevBlinkinLedDriver.BlinkinPattern pattern;
+
+    Telemetry.Item patternName;
+    Telemetry.Item display;
+    Deadline ledCycleDeadline;
+    Deadline gamepadRateLimit;
+
     ElapsedTime feederTimer = new ElapsedTime();
 
     /*
@@ -156,8 +169,9 @@ public class teleOpTwo extends OpMode {
 
 // here are the values for auto locking and the automatic velocity calcluation
     boolean autoAim = false;
-    boolean autoVelocity= false;
+    boolean autoVelocity = false;
     double P_autoAim = 1.0/30.0;
+    double targetVelocity = 0.0;
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -184,6 +198,7 @@ public class teleOpTwo extends OpMode {
 
         Camera camera = new Camera(hardwareMap);
         mecanumDrive = new MecanumDrive(hardwareMap, Storage.pose);
+        blinkinLedDriver = hardwareMap.get(RevBlinkinLedDriver.class, "blinkin");
 
 
         /*
@@ -260,8 +275,12 @@ public class teleOpTwo extends OpMode {
 // this is to switch between the alliances for any reason like running the wrong autonomous program
         if (gamepad1.b) {
             alliance = Storage.Alliance.RED;
+            pattern = RevBlinkinLedDriver.BlinkinPattern.RED;
+            blinkinLedDriver.setPattern(pattern);
         } else if (gamepad1.x) {
             alliance = Storage.Alliance.BLUE;
+            pattern = RevBlinkinLedDriver.BlinkinPattern.BLUE;
+            blinkinLedDriver.setPattern(pattern);
         }
 
         telemetry.addData("Press X", "for BLUE");
@@ -283,6 +302,7 @@ public class teleOpTwo extends OpMode {
     public void loop() {
 // updates the robots position constantly
         mecanumDrive.updatePoseEstimate();
+
         /*
          * Here we call a function called arcadeDrive. The arcadeDrive function takes the input from
          * the joysticks, and applies power to the left and right drive motor to move the robot
@@ -311,7 +331,7 @@ public class teleOpTwo extends OpMode {
         double Y_DISTANCE = GOAL_Y - mecanumDrive.localizer.getPose().position.y;
 
         double GOAL_DISTANCE = Math.sqrt((X_DISTANCE * X_DISTANCE) + (Y_DISTANCE * Y_DISTANCE));
-        double targetVelocity = 5.1059 * GOAL_DISTANCE + (905.26);
+
 
 // the values and equations of the auto lock part of the teleop
         double GoalHeading = (Math.atan2((GOAL_Y - mecanumDrive.localizer.getPose().position.y), GOAL_X - mecanumDrive.localizer.getPose().position.x) * (180.0/Math.PI));
@@ -325,7 +345,7 @@ public class teleOpTwo extends OpMode {
             autoAim = !autoAim;
         }
 
-// resets the robot's zero postion to however it currently is on the field
+// resets the robot's zero position to however it currently is on the field
         if (gamepad1.bWasPressed()) {
             mecanumDrive.localizer.setPose(new Pose2d(0.0,0.0, 0.0));
         }
@@ -335,9 +355,14 @@ public class teleOpTwo extends OpMode {
         } else if (gamepad2.a) {
             selectedLaunchVelocity = LAUNCHER_TARGET_VELOCITY;
         } else if (gamepad2.xWasPressed()) {
-            autoVelocity = true;
-            selectedLaunchVelocity = targetVelocity;
+            autoVelocity = !autoVelocity;
         } else if (gamepad2.b) {
+            launcher.setVelocity(selectedLaunchVelocity);
+        }
+
+        if (autoVelocity) {
+            targetVelocity = 5.1059 * GOAL_DISTANCE + (905.26);
+            selectedLaunchVelocity = targetVelocity;
             launcher.setVelocity(selectedLaunchVelocity);
         }
 
@@ -351,6 +376,15 @@ public class teleOpTwo extends OpMode {
             mecanumDrive(-gamepad1.left_stick_y * driveMultiplier, gamepad1.left_stick_x * driveMultiplier, AutoAimPower);
         }
 
+        // These are the statements that indicate what to do if the robot's position is in a certain part of the field
+
+        if (GOAL_DISTANCE <= 57.7246) {
+            pattern = RevBlinkinLedDriver.BlinkinPattern.STROBE_RED;
+            blinkinLedDriver.setPattern(pattern);
+        } else {
+            pattern = RevBlinkinLedDriver.BlinkinPattern.TWINKLES_OCEAN_PALETTE;
+            blinkinLedDriver.setPattern(pattern);
+        }
 
         launch(gamepad2.rightBumperWasPressed());
         index(gamepad2.leftBumperWasPressed());
@@ -375,8 +409,15 @@ public class teleOpTwo extends OpMode {
         telemetry.addData("Distance from Goal", GOAL_DISTANCE);
         telemetry.addData("Velocity", launcher.getVelocity());
         telemetry.addData("Set Launcher Velocity", selectedLaunchVelocity);
+
+        telemetry.addData("Too Close to the Goal: STROBE_RED", pattern = RevBlinkinLedDriver.BlinkinPattern.STROBE_RED);
+        telemetry.addData("Not inside the launch triangle: HOT_PINK", pattern = RevBlinkinLedDriver.BlinkinPattern.HOT_PINK);
+        telemetry.addData("", pattern = RevBlinkinLedDriver.BlinkinPattern.STROBE_WHITE);
+
         telemetry.update();
     }
+
+
 
     /*
      * Code to run ONCE after the driver hits STOP
@@ -484,6 +525,6 @@ public class teleOpTwo extends OpMode {
                 }
                 break;
         }
-    } // end of indexing voic
+    } // end of indexing void
 
 } // end of the complete program
