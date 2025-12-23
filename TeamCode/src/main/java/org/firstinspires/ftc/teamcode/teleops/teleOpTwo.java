@@ -34,6 +34,8 @@ package org.firstinspires.ftc.teamcode.teleops;
 
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
 
+import static org.firstinspires.ftc.teamcode.utility.Storage.alliance;
+
 import com.acmerobotics.roadrunner.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -43,6 +45,12 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
+
+import org.firstinspires.ftc.robotcontroller.external.samples.SampleRevBlinkinLedDriver;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.internal.system.Deadline;
 
 import org.firstinspires.ftc.teamcode.autos.RedGoalAUTORR;
 import org.firstinspires.ftc.teamcode.subsystems.Launcher;
@@ -51,6 +59,7 @@ import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive;
 import org.firstinspires.ftc.teamcode.roadrunner_essentials.*;
 import org.firstinspires.ftc.teamcode.utility.Storage;
 import org.firstinspires.ftc.vision.apriltag.AprilTagLibrary;
+
 
 /*
  * This file includes a teleop (driver-controlled) file for the goBILDA® StarterBot for the
@@ -74,9 +83,14 @@ public class teleOpTwo extends OpMode {
     final double FULL_SPEED = 1.0;
     final double TURN_SPEED = 0.05;
 
-    final double RED_GOAL_X = -72.0;
-    final double RED_GOAL_Y = 72.0;
+    // here are all the values for the normal shooting velocity
+    final double HIGH_LAUNCH = 1650;
+    final double LAUNCHER_TARGET_VELOCITY = 1200;
+    final double LAUNCHER_MIN_VELOCITY = 1050;
 
+    // here are all the values for indexing
+    final double LAUNCHER_INDEX_TARGET_VELOCITY = 615.0;
+    final double LAUNCHER_INDEX_MIN_VELOCITY = 600.0;
 
     /*
      * When we control our launcher motor, we are using encoders. These allow the control system
@@ -84,11 +98,10 @@ public class teleOpTwo extends OpMode {
      * velocity. Here we are setting the target, and minimum velocity that the launcher should run
      * at. The minimum velocity is a threshold for determining when to fire.
      */
-    final double LAUNCHER_TARGET_VELOCITY = 1250;
-    final double LAUNCHER_MIN_VELOCITY = 1050;
 
-    final double LAUNCHER_INDEX_TARGET_VELOCITY = 615.0;
-    final double LAUNCHER_INDEX_MIN_VELOCITY = 600.0;
+    //here are the neutral set values for the goals used in auto locking
+    double GOAL_X = -72.0;
+    double GOAL_Y = 72.0;
 
     // Declare OpMode members.
     private DcMotor frontLeftDrive = null;
@@ -99,6 +112,14 @@ public class teleOpTwo extends OpMode {
     private DcMotorEx launcher = null;
     private CRServo leftFeeder = null;
     private CRServo rightFeeder = null;
+
+    RevBlinkinLedDriver blinkinLedDriver;
+    RevBlinkinLedDriver.BlinkinPattern pattern;
+
+    Telemetry.Item patternName;
+    Telemetry.Item display;
+    Deadline ledCycleDeadline;
+    Deadline gamepadRateLimit;
 
     ElapsedTime feederTimer = new ElapsedTime();
 
@@ -118,12 +139,16 @@ public class teleOpTwo extends OpMode {
      * We can use higher level code to cycle through these states. But this allows us to write
      * functions and autonomous routines in a way that avoids loops within loops, and "waits".
      */
+
+    //these are the actions for launching
     private enum LaunchState {
         IDLE,
         SPIN_UP,
         LAUNCH,
         LAUNCHING
     }
+
+    //these are the actions for indexing
     private enum IndexState {
         IDLE_INDEX,
         START_INDEX,
@@ -131,6 +156,7 @@ public class teleOpTwo extends OpMode {
         STOP_INDEX
 
     }
+
     private LaunchState launchState;
     private IndexState indexState;
 
@@ -140,6 +166,13 @@ public class teleOpTwo extends OpMode {
     double frontRightPower;
     double backRightPower;
     public MecanumDrive mecanumDrive;
+    double selectedLaunchVelocity = 0;
+
+// here are the values for auto locking and the automatic velocity calcluation
+    boolean autoAim = false;
+    boolean autoVelocity = false;
+    double P_autoAim = 1.0/30.0;
+    double targetVelocity = 0.0;
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -159,12 +192,15 @@ public class teleOpTwo extends OpMode {
         backLeftDrive = hardwareMap.get(DcMotor.class, "leftBack");
         frontRightDrive = hardwareMap.get(DcMotor.class, "rightFront");
         backRightDrive = hardwareMap.get(DcMotor.class, "rightBack");
+
         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
         intake = hardwareMap.get(DcMotor.class, "intake");
         leftFeeder = hardwareMap.get(CRServo.class, "leftFeeder");
         rightFeeder = hardwareMap.get(CRServo.class, "rightFeeder");
+
         Camera camera = new Camera(hardwareMap);
         mecanumDrive = new MecanumDrive(hardwareMap, Storage.pose);
+        blinkinLedDriver = hardwareMap.get(RevBlinkinLedDriver.class, "blinkin");
 
 
         /*
@@ -241,6 +277,20 @@ public class teleOpTwo extends OpMode {
      */
     @Override
     public void init_loop() {
+// this is to switch between the alliances for any reason like running the wrong autonomous program
+        if (gamepad1.b) {
+            alliance = Storage.Alliance.RED;
+            pattern = RevBlinkinLedDriver.BlinkinPattern.RED;
+            blinkinLedDriver.setPattern(pattern);
+        } else if (gamepad1.x) {
+            alliance = Storage.Alliance.BLUE;
+            pattern = RevBlinkinLedDriver.BlinkinPattern.BLUE;
+            blinkinLedDriver.setPattern(pattern);
+        }
+
+        telemetry.addData("Press X", "for BLUE");
+        telemetry.addData("Press B", "for RED");
+        telemetry.addData("Selected Alliance", alliance);
     }
 
     /*
@@ -255,6 +305,9 @@ public class teleOpTwo extends OpMode {
      */
     @Override
     public void loop() {
+// updates the robots position constantly
+        mecanumDrive.updatePoseEstimate();
+
         /*
          * Here we call a function called arcadeDrive. The arcadeDrive function takes the input from
          * the joysticks, and applies power to the left and right drive motor to move the robot
@@ -267,47 +320,115 @@ public class teleOpTwo extends OpMode {
         //arcadeDrive(-gamepad1.left_stick_y, gamepad1.right_stick_x);
         //mecanumDrive(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
 
+        //This is where we add the slow movement option for any precise movements on the field
         double driveMultiplier = gamepad1.right_bumper ? TURN_SPEED : FULL_SPEED;
 
-        mecanumDrive(
-                -gamepad1.left_stick_y * driveMultiplier, gamepad1.left_stick_x * driveMultiplier, gamepad1.right_stick_x * driveMultiplier
-        );
+//here is where the goal location values are differentiated for the two different alliances
+        if(alliance == Storage.Alliance.BLUE) {
+            GOAL_Y = -72.0;
+        }
+        else if(alliance == Storage.Alliance.RED) {
+            GOAL_Y = 72.0;
+        }
+
+// these are the values and equations to calculate the velocity
+        double X_DISTANCE = GOAL_X - mecanumDrive.localizer.getPose().position.x;
+        double Y_DISTANCE = GOAL_Y - mecanumDrive.localizer.getPose().position.y;
+
+        double GOAL_DISTANCE = Math.sqrt((X_DISTANCE * X_DISTANCE) + (Y_DISTANCE * Y_DISTANCE));
+
+
+// the values and equations of the auto lock part of the teleop
+        double GoalHeading = (Math.atan2((GOAL_Y - mecanumDrive.localizer.getPose().position.y), GOAL_X - mecanumDrive.localizer.getPose().position.x) * (180.0/Math.PI));
+        double AutoAimError = GoalHeading - (mecanumDrive.localizer.getPose().heading.toDouble() * (180.0/Math.PI));
+        while (AutoAimError > 180) AutoAimError -= 360;
+        while (AutoAimError <= -180) AutoAimError += 360;
+
+        double AutoAimPower = AutoAimError * -P_autoAim;
+
+        if (gamepad1.xWasPressed()) {
+            autoAim = !autoAim;
+        }
+
+// resets the robot's zero position to however it currently is on the field
+        if (gamepad1.bWasPressed()) {
+            mecanumDrive.localizer.setPose(new Pose2d(0.0,0.0, 0.0));
+        }
+
+        if(gamepad2.y) {
+            selectedLaunchVelocity = HIGH_LAUNCH;
+        } else if (gamepad2.a) {
+            selectedLaunchVelocity = LAUNCHER_TARGET_VELOCITY;
+        } else if (gamepad2.xWasPressed()) {
+            autoVelocity = !autoVelocity;
+        } else if (gamepad2.b) {
+            launcher.setVelocity(selectedLaunchVelocity);
+        }
+
+        if (autoVelocity) {
+            targetVelocity = 5.1059 * GOAL_DISTANCE + (905.26);
+            selectedLaunchVelocity = targetVelocity;
+            launcher.setVelocity(selectedLaunchVelocity);
+        }
+
+
+        if (!autoAim) {
+            mecanumDrive(
+                    -gamepad1.left_stick_y * driveMultiplier, gamepad1.left_stick_x * driveMultiplier, gamepad1.right_stick_x * driveMultiplier
+            );
 
         double intakePower = -gamepad2.left_stick_y;
 
 
-
-        /*
-         * Here we give the user control of the speed of the launcher motor without automatically
-         * queuing a shot.
-         */
-        if (gamepad1.y) {
-
-        } else if (gamepad2.b) { // stop flywheel
-            launcher.setVelocity(STOP_SPEED);
+        }
+        else {
+            mecanumDrive(-gamepad1.left_stick_y * driveMultiplier, gamepad1.left_stick_x * driveMultiplier, AutoAimPower);
         }
 
-        /*
-         * Now we call our "Launch" function.
-         */
+        // These are the statements that indicate what to do if the robot's position is in a certain part of the field
+
+        if (GOAL_DISTANCE <= 57.7246) {
+            pattern = RevBlinkinLedDriver.BlinkinPattern.STROBE_RED;
+            blinkinLedDriver.setPattern(pattern);
+        } else {
+            pattern = RevBlinkinLedDriver.BlinkinPattern.TWINKLES_OCEAN_PALETTE;
+            blinkinLedDriver.setPattern(pattern);
+        }
+
         launch(gamepad2.rightBumperWasPressed());
         index(gamepad2.leftBumperWasPressed());
         intake.setPower(intakePower);
 
-        /*
-         * Show the state and motor powers
-         */
+
         //telemetry.addData("State", launchState);
         //telemetry.addData("Motors", "left (%.2f), right (%.2f)", frontLeftPower, backLeftPower, frontRightPower, backRightPower);
         //telemetry.addData("motorSpeed", launcher.getVelocity());
+
+        // these are all of the basic values of the robot's position and the goal's heading
         telemetry.addData("X", mecanumDrive.localizer.getPose().position.x);
         telemetry.addData("Y", mecanumDrive.localizer.getPose().position.y);
-        telemetry.addData("Heading", mecanumDrive.localizer.getPose().heading.real*180.0);
-        double GoalHeading = (Math.atan2((RED_GOAL_Y - mecanumDrive.localizer.getPose().position.y), RED_GOAL_X - mecanumDrive.localizer.getPose().position.x)*(180.0/Math.PI));
+        telemetry.addData("Heading", mecanumDrive.localizer.getPose().heading.toDouble() * (180.0/Math.PI));
         telemetry.addData("Goal Heading", GoalHeading);
+
+        // this telemetry specifically targets the status of the error and the auto lock
+        telemetry.addData("Auto Aim Status", autoAim);
+        telemetry.addData("Auto Aim Error", AutoAimError);
+        telemetry.addData("Auto Aim Power", AutoAimPower);
+
+        // this is specific to automatically calculating the velocity
+        telemetry.addData("Distance from Goal", GOAL_DISTANCE);
+        telemetry.addData("Velocity", launcher.getVelocity());
+        telemetry.addData("Set Launcher Velocity", selectedLaunchVelocity);
+
+        telemetry.addData("Too Close to the Goal: STROBE_RED", pattern = RevBlinkinLedDriver.BlinkinPattern.STROBE_RED);
+        telemetry.addData("Not inside the launch triangle: HOT_PINK", pattern = RevBlinkinLedDriver.BlinkinPattern.HOT_PINK);
+        telemetry.addData("", pattern = RevBlinkinLedDriver.BlinkinPattern.STROBE_WHITE);
+
         telemetry.addData("intakePower: ", intakePower);
         telemetry.update();
     }
+
+
 
     /*
      * Code to run ONCE after the driver hits STOP
@@ -385,8 +506,9 @@ public class teleOpTwo extends OpMode {
                 }
                 break;
             }
-        }
-        //Here is the indexing part of the TeleOp
+        } // end of launch void
+
+//Here is the indexing part of the TeleOp
     void index(boolean indexRequested) {
         switch (indexState) {
             case IDLE_INDEX:
@@ -414,5 +536,6 @@ public class teleOpTwo extends OpMode {
                 }
                 break;
         }
-    }
-}
+    } // end of indexing void
+
+} // end of the complete program

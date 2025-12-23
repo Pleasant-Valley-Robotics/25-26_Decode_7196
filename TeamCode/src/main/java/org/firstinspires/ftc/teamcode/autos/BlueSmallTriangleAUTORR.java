@@ -44,6 +44,16 @@ public class BlueSmallTriangleAUTORR extends LinearOpMode {
 
         while (!isStopRequested() && !opModeIsActive()) {
             //add anything for during initialization
+            if (gamepad1.b) {
+                Storage.alliance = Storage.Alliance.RED;
+            } else if (gamepad1.x) {
+                Storage.alliance = Storage.Alliance.BLUE;
+            }
+
+            telemetry.addData("Press X", "for BLUE");
+            telemetry.addData("Press B", "for RED");
+            telemetry.addData("Selected Alliance", Storage.alliance);
+
             telemetry.addData("Shots To Cycle", camera.findShotsToCycle());
             telemetry.update();
         }
@@ -59,7 +69,7 @@ public class BlueSmallTriangleAUTORR extends LinearOpMode {
             Actions.runBlocking(
                     new SequentialAction(
                             launcher.IndexBall(),
-                            new SleepAction(1.0)
+                            new SleepAction(1.5)
                     )
             );
         } // end indexing

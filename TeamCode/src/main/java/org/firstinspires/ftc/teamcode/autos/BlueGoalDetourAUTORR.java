@@ -26,17 +26,27 @@ public class BlueGoalDetourAUTORR extends LinearOpMode {
         Launcher launcher = new Launcher(hardwareMap);
         Camera camera = new Camera(hardwareMap);
 
+
 // This is supposed to go to the coordinates of the shooting distance (-30.6209, 21.5313) with heading 129.5463
 //This is the coordinates for the ending position of Goal AUTO (-61.7134, 17.4823) with heading -177.7059
         Vector2d shootPosition = new Vector2d(-62.067, -11.5763);
         TrajectoryActionBuilder goToShoot = drive.actionBuilder(initialPose)
                 .strafeToLinearHeading(shootPosition, Math.toRadians(-90.1629))
                 .waitSeconds(1.0);
-
         Vector2d endingPosition = new Vector2d(-62.0308, -12.9117);
 
         while (!isStopRequested() && !opModeIsActive()) {
             //add anything for during initialization
+            if (gamepad1.b) {
+                Storage.alliance = Storage.Alliance.RED;
+            } else if (gamepad1.x) {
+                Storage.alliance = Storage.Alliance.BLUE;
+            }
+
+            telemetry.addData("Press X", "for BLUE");
+            telemetry.addData("Press B", "for RED");
+            telemetry.addData("Selected Alliance", Storage.alliance);
+
             telemetry.addData("Shots To Cycle", camera.findShotsToCycle());
             telemetry.update();
         }
@@ -52,7 +62,7 @@ public class BlueGoalDetourAUTORR extends LinearOpMode {
             Actions.runBlocking(
                     new SequentialAction(
                             launcher.IndexBall(),
-                            new SleepAction(1.0)
+                            new SleepAction(1.5)
                     )
             );
         } // end indexing

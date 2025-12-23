@@ -93,16 +93,16 @@ public class IndexBall implements Action {
         }
         double vel = launcher.getVelocity();
         packet.put("launcherVelocity", vel);
-        if (vel > 575.0) {
+        if (vel > 585.0) {
             double tim = feederTimer.seconds();
             packet.put("feederTimer", tim);
-            launcher.setVelocity(575.0);
+            launcher.setVelocity(585.0);
             leftFeeder.setPower(1.0);
             rightFeeder.setPower(1.0);
             startedShooting = true;
 
         } else if (!startedShooting) {
-            launcher.setVelocity(575.0);
+            launcher.setVelocity(585.0);
             feederTimer.reset();
             feederTimer.startTime();
         }
