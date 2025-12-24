@@ -111,6 +111,7 @@ public class teleOpTwo extends OpMode {
     private DcMotorEx launcher = null;
     private CRServo leftFeeder = null;
     private CRServo rightFeeder = null;
+    private DcMotor intake = null;
 
     RevBlinkinLedDriver blinkinLedDriver;
     RevBlinkinLedDriver.BlinkinPattern pattern;
@@ -193,10 +194,9 @@ public class teleOpTwo extends OpMode {
         backRightDrive = hardwareMap.get(DcMotor.class, "rightBack");
 
         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
+        intake = hardwareMap.get(DcMotor.class, "intake");
         leftFeeder = hardwareMap.get(CRServo.class, "leftFeeder");
         rightFeeder = hardwareMap.get(CRServo.class, "rightFeeder");
-
-        Camera camera = new Camera(hardwareMap);
         mecanumDrive = new MecanumDrive(hardwareMap, Storage.pose);
         blinkinLedDriver = hardwareMap.get(RevBlinkinLedDriver.class, "blinkin");
 
@@ -251,7 +251,7 @@ public class teleOpTwo extends OpMode {
         leftFeeder.setPower(STOP_SPEED);
         rightFeeder.setPower(STOP_SPEED);
 
-        launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(300, 0, 0, 10));
+        //launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(300, 0, 0, 10));
 
         /*
          * Much like our drivetrain motors, we set the left feeder servo to reverse so that they
@@ -361,9 +361,9 @@ public class teleOpTwo extends OpMode {
         }
 
         if (autoVelocity) {
-            targetVelocity = 5.1059 * GOAL_DISTANCE + (905.26);
-            selectedLaunchVelocity = targetVelocity;
-            launcher.setVelocity(selectedLaunchVelocity);
+        //    targetVelocity = 5.1059 * GOAL_DISTANCE + (905.26);
+        //    selectedLaunchVelocity = targetVelocity;
+        //    launcher.setVelocity(selectedLaunchVelocity);
         }
 
 
@@ -386,9 +386,10 @@ public class teleOpTwo extends OpMode {
             blinkinLedDriver.setPattern(pattern);
         }
 
-        launch(gamepad2.rightBumperWasPressed());
+        //launch(gamepad2.rightBumperWasPressed());
         index(gamepad2.leftBumperWasPressed());
-
+        intake.setPower(-gamepad2.left_stick_y);
+        launcher.setPower(-gamepad2.right_stick_y);
 
         //telemetry.addData("State", launchState);
         //telemetry.addData("Motors", "left (%.2f), right (%.2f)", frontLeftPower, backLeftPower, frontRightPower, backRightPower);
