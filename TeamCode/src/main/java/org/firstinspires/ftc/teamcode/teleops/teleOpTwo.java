@@ -386,7 +386,11 @@ public class teleOpTwo extends OpMode {
             blinkinLedDriver.setPattern(pattern);
         }
 
+<<<<<<< Updated upstream
         //launch(gamepad2.rightBumperWasPressed());
+=======
+        launch(gamepad2.right);
+>>>>>>> Stashed changes
         index(gamepad2.leftBumperWasPressed());
         intake.setPower(-gamepad2.left_stick_y);
         launcher.setPower(-gamepad2.right_stick_y);
