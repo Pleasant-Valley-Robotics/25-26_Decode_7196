@@ -19,39 +19,28 @@ public class Intake {
     public Intake(HardwareMap hardwareMap) {
         intake = hardwareMap.get(DcMotorEx.class, "intake");
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        intake.setDirection(DcMotor.Direction.FORWARD);
-        intake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        intake.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(300, 0, 0, 10));
+        intake.setDirection(DcMotor.Direction.REVERSE);
+        intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        //intake.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(300, 0, 0, 10));
     }
 
     public class intakeBall implements Action {
         private boolean initialized = false;
-        private boolean startedIntake = false;
 
         @Override
         public boolean run(@NonNull TelemetryPacket packet) {
             if (!initialized) {
                 initialized = true;
-                startedIntake = false;
-                intake.setVelocity(0.0);
+                intake.setPower(0.0);
                 intakeTimer.reset();
                 intakeTimer.startTime();
             }
-            double vel = intake.getVelocity();
-            packet.put("intakeVelocity", vel);
-            if (vel > 1250.0) {
-                startedIntake = true;
-                double tim = intakeTimer.seconds();
-                packet.put("intakeTimer", tim);
-                intake.setVelocity(1250.0);
 
-            } else if (!startedIntake) {
-                intake.setVelocity(1250.0);
-                intakeTimer.reset();
-                intakeTimer.startTime();
-            }
-            if (intakeTimer.seconds() > 0.50) {
-                intake.setVelocity(0.0);
+            double tim = intakeTimer.seconds();
+            packet.put("intakeTimer", tim);
+            intake.setPower(1.0);
+            if (tim > 20.0) {
+                intake.setPower(0.0);
                 return false;
             }
             return true;

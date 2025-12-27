@@ -174,6 +174,8 @@ public class teleOpTwo extends OpMode {
     double P_autoAim = 1.0/30.0;
     double targetVelocity = 0.0;
 
+    double intakePower = 0.0;
+
     /*
      * Code to run ONCE when the driver hits INIT
      */
@@ -198,7 +200,6 @@ public class teleOpTwo extends OpMode {
         leftFeeder = hardwareMap.get(CRServo.class, "leftFeeder");
         rightFeeder = hardwareMap.get(CRServo.class, "rightFeeder");
 
-        Camera camera = new Camera(hardwareMap);
         mecanumDrive = new MecanumDrive(hardwareMap, Storage.pose);
         blinkinLedDriver = hardwareMap.get(RevBlinkinLedDriver.class, "blinkin");
 
@@ -217,7 +218,7 @@ public class teleOpTwo extends OpMode {
         backRightDrive.setDirection(DcMotor.Direction.FORWARD);
 
         launcher.setDirection(DcMotor.Direction.FORWARD);
-        intake.setDirection(DcMotorSimple.Direction.FORWARD);
+        intake.setDirection(DcMotorSimple.Direction.REVERSE);
 
         /*
          * Here we set our launcher to the RUN_USING_ENCODER run mode.
@@ -357,11 +358,14 @@ public class teleOpTwo extends OpMode {
 
         if(gamepad2.y) {
             selectedLaunchVelocity = HIGH_LAUNCH;
+            launcher.setVelocity(selectedLaunchVelocity);
         } else if (gamepad2.a) {
             selectedLaunchVelocity = LAUNCHER_TARGET_VELOCITY;
+            launcher.setVelocity(selectedLaunchVelocity);
         } else if (gamepad2.xWasPressed()) {
             autoVelocity = !autoVelocity;
         } else if (gamepad2.b) {
+            selectedLaunchVelocity = 0.0;
             launcher.setVelocity(selectedLaunchVelocity);
         }
 
@@ -376,15 +380,11 @@ public class teleOpTwo extends OpMode {
             mecanumDrive(
                     -gamepad1.left_stick_y * driveMultiplier, gamepad1.left_stick_x * driveMultiplier, gamepad1.right_stick_x * driveMultiplier
             );
-
-        double intakePower = -gamepad2.left_stick_y;
-
-
         }
         else {
             mecanumDrive(-gamepad1.left_stick_y * driveMultiplier, gamepad1.left_stick_x * driveMultiplier, AutoAimPower);
         }
-
+        double intakePower = -gamepad2.left_stick_y;
         // These are the statements that indicate what to do if the robot's position is in a certain part of the field
 
         if (GOAL_DISTANCE <= 57.7246) {
