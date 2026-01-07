@@ -109,6 +109,7 @@ public class teleOpTwo extends OpMode {
     private DcMotor backLeftDrive = null;
     private DcMotor frontRightDrive = null;
     private DcMotor backRightDrive = null;
+    private DcMotor intake = null;
     private DcMotorEx launcher = null;
     private CRServo leftFeeder = null;
     private CRServo rightFeeder = null;
@@ -174,6 +175,8 @@ public class teleOpTwo extends OpMode {
     double P_autoAim = 1.0/30.0;
     double targetVelocity = 0.0;
 
+    double intakePower = 0.0;
+
     /*
      * Code to run ONCE when the driver hits INIT
      */
@@ -215,6 +218,7 @@ public class teleOpTwo extends OpMode {
         backRightDrive.setDirection(DcMotor.Direction.FORWARD);
 
         launcher.setDirection(DcMotor.Direction.FORWARD);
+        intake.setDirection(DcMotorSimple.Direction.REVERSE);
 
         /*
          * Here we set our launcher to the RUN_USING_ENCODER run mode.
@@ -230,6 +234,7 @@ public class teleOpTwo extends OpMode {
         backLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        intake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         /*
          * Setting zeroPowerBehavior to BRAKE enables a "brake mode". This causes the motor to
@@ -243,6 +248,7 @@ public class teleOpTwo extends OpMode {
         backRightDrive.setZeroPowerBehavior(BRAKE);
 
         launcher.setZeroPowerBehavior(BRAKE);
+        intake.setZeroPowerBehavior(BRAKE);
 
         /*
          * set Feeders to an initial value to initialize the servo controller
@@ -352,11 +358,14 @@ public class teleOpTwo extends OpMode {
 
         if(gamepad2.y) {
             selectedLaunchVelocity = HIGH_LAUNCH;
+            launcher.setVelocity(selectedLaunchVelocity);
         } else if (gamepad2.a) {
             selectedLaunchVelocity = LAUNCHER_TARGET_VELOCITY;
+            launcher.setVelocity(selectedLaunchVelocity);
         } else if (gamepad2.xWasPressed()) {
             autoVelocity = !autoVelocity;
         } else if (gamepad2.b) {
+            selectedLaunchVelocity = 0.0;
             launcher.setVelocity(selectedLaunchVelocity);
         }
 
@@ -375,7 +384,7 @@ public class teleOpTwo extends OpMode {
         else {
             mecanumDrive(-gamepad1.left_stick_y * driveMultiplier, gamepad1.left_stick_x * driveMultiplier, AutoAimPower);
         }
-
+        double intakePower = -gamepad2.left_stick_y;
         // These are the statements that indicate what to do if the robot's position is in a certain part of the field
 
         if (GOAL_DISTANCE <= 57.7246) {
@@ -390,6 +399,8 @@ public class teleOpTwo extends OpMode {
         index(gamepad2.leftBumperWasPressed());
         intake.setPower(-gamepad2.left_stick_y);
         launcher.setPower(-gamepad2.right_stick_y);
+        intake.setPower(intakePower);
+
 
         //telemetry.addData("State", launchState);
         //telemetry.addData("Motors", "left (%.2f), right (%.2f)", frontLeftPower, backLeftPower, frontRightPower, backRightPower);
@@ -415,6 +426,7 @@ public class teleOpTwo extends OpMode {
         telemetry.addData("Not inside the launch triangle: HOT_PINK", pattern = RevBlinkinLedDriver.BlinkinPattern.HOT_PINK);
         telemetry.addData("", pattern = RevBlinkinLedDriver.BlinkinPattern.STROBE_WHITE);
 
+        telemetry.addData("intakePower: ", intakePower);
         telemetry.update();
     }
 
