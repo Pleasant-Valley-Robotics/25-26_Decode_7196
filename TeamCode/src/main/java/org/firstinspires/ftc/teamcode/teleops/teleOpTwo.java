@@ -350,6 +350,11 @@ public class teleOpTwo extends OpMode {
             autoAim = !autoAim;
         }
 
+        if (gamepad2.aWasPressed()) {
+            intake.setPower(0.25);
+        }
+
+
 // resets the robot's zero position to however it currently is on the field
         if (gamepad1.bWasPressed()) {
             mecanumDrive.localizer.setPose(new Pose2d(0.0,0.0, 0.0));
@@ -396,10 +401,9 @@ public class teleOpTwo extends OpMode {
 
         launch(gamepad2.rightBumperWasPressed());
         index(gamepad2.leftBumperWasPressed());
+        intake.setPower(intakePower);
         intake.setPower(-gamepad2.left_stick_y);
         launcher.setPower(-gamepad2.right_stick_y);
-        intake.setPower(intakePower);
-
 
         //telemetry.addData("State", launchState);
         //telemetry.addData("Motors", "left (%.2f), right (%.2f)", frontLeftPower, backLeftPower, frontRightPower, backRightPower);
