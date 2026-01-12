@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
@@ -31,15 +32,23 @@ public class RedGoalAUTORR extends LinearOpMode {
         Pose2d initialPose = new Pose2d(-55.135, 49.0834, Math.toRadians(131.014));
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
         Launcher launcher = new Launcher(hardwareMap);
+        Intake intake = new Intake(hardwareMap);
         Camera camera = new Camera(hardwareMap);
 
-// This is supposed to go to the coordinates of the shooting distance (-30.6209, 21.5313) with heading 129.5463
-//This is the coordinates for the ending position of Goal AUTO (-61.7134, 17.4823) with heading -177.7059
         Vector2d shootPosition = new Vector2d(-30.6209, 21.5313);
         TrajectoryActionBuilder goToShoot = drive.actionBuilder(initialPose)
                 .strafeToLinearHeading(shootPosition, Math.toRadians(129.5463))
                 .waitSeconds(1.0);
 
+        Vector2d intakeOne = new Vector2d(-12.0, 36.0);
+        TrajectoryActionBuilder goToIntakeOne = drive.actionBuilder(drive.localizer.getPose())
+                .strafeToLinearHeading(intakeOne, Math.toRadians(90.0))
+                .waitSeconds(1.0);
+
+        Vector2d intakeOneCollect = new Vector2d(-12.0, 48.0);
+        TrajectoryActionBuilder goToIntakeOneCollect = drive.actionBuilder(drive.localizer.getPose())
+                .strafeToLinearHeading(intakeOneCollect, Math.toRadians(90.0))
+                .waitSeconds(1.0);
 
         Vector2d endingPosition = new Vector2d(-61.6131, 11.5718);
 
@@ -73,9 +82,32 @@ public class RedGoalAUTORR extends LinearOpMode {
                         launcher.ShootBall(),
                         new SleepAction(1.0),
                         launcher.ShootBall(),
+                        new SleepAction(1.0),
+                        goToIntakeOne.build()
+                )
+        ); // first round of shooting the pre-loaded artifacts
+
+        Actions.runBlocking(
+          new ParallelAction((
+                  intake.intakeBall()),
+                  goToIntakeOneCollect.build()
+                  )
+        ); // The robot collects the artifacts as it moves to the next position
+
+        Actions.runBlocking(
+                new SequentialAction(
+                        goToShoot.build(),
+                        new SleepAction(1.0),
+                        launcher.ShootBall(),
+                        new SleepAction(1.0),
+                        launcher.ShootBall(),
+                        new SleepAction(1.0),
+                        launcher.ShootBall(),
                         new SleepAction(1.0)
+                      //  goToIntakeOne.build()
                 )
         );
+
         TrajectoryActionBuilder goToEnd = drive.actionBuilder(drive.localizer.getPose())
                 .strafeToLinearHeading(endingPosition, Math.toRadians(-177.7059))
                 .waitSeconds(1.0);

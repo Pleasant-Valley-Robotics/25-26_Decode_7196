@@ -33,7 +33,7 @@ public class Camera {
                     shotsToCycle = 2;
                 } else if (result.getFiducialResults().get(0).getFiducialId() == 23) {
                     shotsToCycle = 1;
-                } // end of april tag 23 code
+                } // end of assigning each ID the number of artifacts to cycle
             }
         } return  shotsToCycle;
     } // end of find shots to cycle

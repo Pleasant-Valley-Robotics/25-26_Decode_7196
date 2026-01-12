@@ -19,8 +19,8 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.roadrunner_essentials.messages.ThreeDeadWheelInputsMessage;
 
-@Disabled
 @Config
+@Disabled
 public final class ThreeDeadWheelLocalizer implements Localizer {
     public static class Params {
         public double par0YTicks = 0.0; // y position of the first parallel encoder (in tick units)
