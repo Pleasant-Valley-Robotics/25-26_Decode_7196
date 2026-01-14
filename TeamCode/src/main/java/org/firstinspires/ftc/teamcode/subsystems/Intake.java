@@ -29,7 +29,7 @@ public class Intake {
 
         @Override
         public boolean run(@NonNull TelemetryPacket packet) {
-            if (!initialized) {
+   /*         if (!initialized) {
                 initialized = true;
                 intake.setPower(0.0);
                 intakeTimer.reset();
@@ -42,8 +42,9 @@ public class Intake {
             if (tim > 20.0) {
                 intake.setPower(0.0);
                 return false;
-            }
-            return true;
+            }*/
+            intake.setPower(1.0);
+            return false;
         }
     } // end of intakeBall action
 
@@ -51,4 +52,62 @@ public class Intake {
     {
         return new Intake.intakeBall();
     }
+
+    public class outtakeBall implements Action {
+        private boolean initialized = false;
+
+        @Override
+        public boolean run(@NonNull TelemetryPacket packet) {
+            if (!initialized) {
+                initialized = true;
+                intake.setPower(0.0);
+                intakeTimer.reset();
+                intakeTimer.startTime();
+            }
+
+            double tim = intakeTimer.seconds();
+            packet.put("intakeTimer", tim);
+            intake.setPower(-1.0);
+            if (tim > 0.5) {
+                intake.setPower(0.0);
+                return false;
+            }
+            return true;
+        }
+    } // end of intakeBall action
+
+    public Action outtakeBall()
+    {
+        return new Intake.outtakeBall();
+    }
+
+    public class stopIntakeBall implements Action {
+        private boolean initialized = false;
+
+        @Override
+        public boolean run(@NonNull TelemetryPacket packet) {
+   /*         if (!initialized) {
+                initialized = true;
+                intake.setPower(0.0);
+                intakeTimer.reset();
+                intakeTimer.startTime();
+            }
+
+            double tim = intakeTimer.seconds();
+            packet.put("intakeTimer", tim);
+            intake.setPower(1.0);
+            if (tim > 20.0) {
+                intake.setPower(0.0);
+                return false;
+            }*/
+            intake.setPower(0.0);
+            return false;
+        }
+    } // end of intakeBall action
+
+    public Action stopIntakeBall()
+    {
+        return new Intake.stopIntakeBall();
+    }
+
 } // end of Intake class

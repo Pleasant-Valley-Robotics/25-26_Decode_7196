@@ -29,9 +29,9 @@ public class BlueSmallTriangleDetourAUTORR extends LinearOpMode {
 // This is supposed to go to the coordinates of the shooting distance (-30.6209, 21.5313) with heading 129.5463
 //This is the coordinates for the ending position of Goal AUTO (-61.7134, 17.4823) with heading -177.7059
         Vector2d shootPosition = new Vector2d(-62.067, -11.5763);
-        TrajectoryActionBuilder goToShoot = drive.actionBuilder(initialPose)
+        TrajectoryActionBuilder goToShootDetour = drive.actionBuilder(initialPose)
                 .strafeToLinearHeading(shootPosition, Math.toRadians(-90.1629))
-                .waitSeconds(1.0);
+                .waitSeconds(0.5);
 
         Vector2d endingPosition = new Vector2d(-62.0308, -12.9117);
 
@@ -70,7 +70,7 @@ public class BlueSmallTriangleDetourAUTORR extends LinearOpMode {
 
         Actions.runBlocking(
                 new SequentialAction(
-                        goToShoot.build(),
+                        goToShootDetour.build(),
                         new SleepAction(1.0),
                         launcher.ShootBall(),
                         new SleepAction(1.0),

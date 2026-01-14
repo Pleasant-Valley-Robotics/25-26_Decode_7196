@@ -22,7 +22,7 @@ public class Launcher {
         launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         launcher.setDirection(DcMotor.Direction.FORWARD);
         launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(300,0,0,10));
+        launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(350,0,0,12));
         leftFeeder = hardwareMap.get(CRServo.class, "leftFeeder");
         leftFeeder.setPower(0.0);
         leftFeeder.setDirection(DcMotor.Direction.FORWARD);
@@ -93,20 +93,21 @@ public class IndexBall implements Action {
         }
         double vel = launcher.getVelocity();
         packet.put("launcherVelocity", vel);
-        if (vel > 585.0) {
+        if (vel > 600.0) {
             double tim = feederTimer.seconds();
             packet.put("feederTimer", tim);
-            launcher.setVelocity(585.0);
-            leftFeeder.setPower(1.0);
-            rightFeeder.setPower(1.0);
             startedShooting = true;
 
         } else if (!startedShooting) {
-            launcher.setVelocity(585.0);
+            launcher.setVelocity(600.0);
             feederTimer.reset();
             feederTimer.startTime();
         }
-        if (feederTimer.seconds() > 0.50) {
+        if (feederTimer.seconds() > 0.15){
+            leftFeeder.setPower(1.0);
+            rightFeeder.setPower(1.0);
+        }
+        if (feederTimer.seconds() > 0.55) {
             leftFeeder.setPower(0.0);
             rightFeeder.setPower(0.0);
             launcher.setVelocity(0.0);
