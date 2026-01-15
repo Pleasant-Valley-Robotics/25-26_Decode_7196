@@ -99,10 +99,10 @@ public class RedGoalAUTORR extends LinearOpMode {
                 )
         ); //moving to the first position to intake artifacts
 
-        Vector2d intakeOneCollect = new Vector2d(-12.0, 55.0);
+        Vector2d intakeOneCollect = new Vector2d(-12.0, 54.0);
         TrajectoryActionBuilder goToIntakeOneCollect = drive.actionBuilder(drive.localizer.getPose())
                 //.strafeToLinearHeading(intakeOneCollect, Math.toRadians(90.0))
-                .lineToYConstantHeading(53.0)
+                .lineToYConstantHeading(52.0)
                 .waitSeconds(0.11); // First set of artifacts intaked
 
         Actions.runBlocking(
@@ -124,15 +124,15 @@ public class RedGoalAUTORR extends LinearOpMode {
                      // new SleepAction(0.15),
                         launcher.ShootBall(),
                         intake.outtakeBall(),
-                        new SleepAction(0.1),
+                        new SleepAction(0.09),
                         intake.intakeBall(),
-                        new SleepAction(0.2),
+                        new SleepAction(0.25),
                         launcher.ShootBall(),
                         intake.intakeBall(),
                         launcher.ShootBall(),
                         intake.stopIntakeBall()
                 )
-        );// robot shoots the second round of artifacts after intaking
+        ); // robot shoots the second round of artifacts after intaking
 
         Vector2d intakeTwo = new Vector2d(12.0, 33.0);
         TrajectoryActionBuilder goToIntakeTwo = drive.actionBuilder(drive.localizer.getPose())
@@ -156,7 +156,7 @@ public class RedGoalAUTORR extends LinearOpMode {
                         intake.intakeBall()),
                         goToIntakeTwoCollect.build()
                 )
-        ); // The robot moves forward as it collects the artifacts
+        ); //The robot moves forward as it collects the artifacts
 
         Vector2d shootPositionTwo = new Vector2d(-30.6209, 21.5313);
         TrajectoryActionBuilder goToShootTwo = drive.actionBuilder(drive.localizer.getPose())
@@ -174,16 +174,45 @@ public class RedGoalAUTORR extends LinearOpMode {
                         intake.intakeBall(),
                         new SleepAction(0.01),
                         launcher.ShootBall(),
+                        new SleepAction(0.1),
                         intake.outtakeBall()
                 )
-        );// robot shoots the second round of artifacts after intaking
+        ); //robot shoots the second round of artifacts after intaking
 
+
+        Vector2d intakeEnd = new Vector2d(36.0, 33.0);
+        TrajectoryActionBuilder goToIntakeEnd = drive.actionBuilder(drive.localizer.getPose())
+                .strafeToLinearHeading(intakeEnd, Math.toRadians(90.0))
+                .waitSeconds(0.01); //Second set of artifacts
+
+        Actions.runBlocking(
+                new SequentialAction(
+                        goToIntakeEnd.build()
+                )
+        );
+
+        Vector2d intakeEndCollect = new Vector2d(36.0224, 60.3667);
+        TrajectoryActionBuilder goToIntakeEndCollect = drive.actionBuilder(drive.localizer.getPose())
+                //.strafeToLinearHeading(intakeTwoCollect, Math.toRadians(90.0))
+                .lineToYConstantHeading(53.0)
+                .waitSeconds(0.01); //Second set of artifacts intaked
+
+        Actions.runBlocking(
+                new SequentialAction((
+                        intake.intakeBall()),
+                        goToIntakeEndCollect.build()
+                )
+            );
+
+        /*
         TrajectoryActionBuilder goToEnd = drive.actionBuilder(drive.localizer.getPose())
                 .strafeToLinearHeading(endingPosition, Math.toRadians(-177.7059))
                 .waitSeconds(0.01);
+
         Actions.runBlocking(
                 goToEnd.build()
         );
+        */
         Storage.pose = drive.localizer.getPose();
     }
 }
