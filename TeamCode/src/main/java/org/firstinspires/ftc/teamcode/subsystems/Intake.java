@@ -67,8 +67,8 @@ public class Intake {
 
             double tim = intakeTimer.seconds();
             packet.put("intakeTimer", tim);
-            intake.setPower(-1.0);
-            if (tim > 0.09) {
+            intake.setPower(-.5);
+            if (tim > 0.20) {
                 intake.setPower(0.0);
                 return false;
             }
