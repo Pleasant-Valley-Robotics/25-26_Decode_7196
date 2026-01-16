@@ -51,13 +51,13 @@ public class RedGoalAUTORR extends LinearOpMode {
             telemetry.addData("Selected Alliance", alliance);
 
         }
-        Pose2d initialPose = new Pose2d(-55.135, 49.0834* flipAuto, Math.toRadians(131.014)*flipAuto);
+        Pose2d initialPose = new Pose2d(-55.135, 49.0834 * flipAuto, Math.toRadians(131.014)*flipAuto);
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
         Launcher launcher = new Launcher(hardwareMap);
         Intake intake = new Intake(hardwareMap);
         Camera camera = new Camera(hardwareMap);
 
-        Vector2d endingPosition = new Vector2d(-61.6131, 11.5718*flipAuto);
+        Vector2d endingPosition = new Vector2d(-61.6131, 11.5718 * flipAuto);
 
         waitForStart();
 
@@ -90,7 +90,7 @@ public class RedGoalAUTORR extends LinearOpMode {
         Vector2d shootPosition = new Vector2d(-30.6209, 21.5313*flipAuto);
         TrajectoryActionBuilder goToShoot = drive.actionBuilder(drive.localizer.getPose())
                 .strafeToLinearHeading(shootPosition, Math.toRadians(129.5463)*flipAuto)
-                .turnTo(129.0*Math.PI/180.0*flipAuto)
+                //.turnTo(129.0*Math.PI/180.0*flipAuto)
                 //.turnTo(Math.9PI/2)
                 .waitSeconds(0.2); // first time moving to the shooting position
 
@@ -117,7 +117,7 @@ public class RedGoalAUTORR extends LinearOpMode {
         Vector2d intakeOne = new Vector2d(-10.0, 30.0*flipAuto);
         TrajectoryActionBuilder goToIntakeOne = drive.actionBuilder(drive.localizer.getPose())
                 .strafeToLinearHeading(intakeOne, Math.toRadians(90.0)*flipAuto)
-                .turnTo(Math.toRadians(90)*flipAuto)
+                //.turnTo(Math.toRadians(90)*flipAuto)
                 .waitSeconds(0.01); //First set of artifacts
 
         Actions.runBlocking(
@@ -140,14 +140,14 @@ public class RedGoalAUTORR extends LinearOpMode {
         Vector2d shootPositionOne = new Vector2d(-30.6209, 21.5313*flipAuto);
         TrajectoryActionBuilder goToShootOne = drive.actionBuilder(drive.localizer.getPose())
                 .strafeToLinearHeading(shootPositionOne, 129.0*Math.PI/180.0*flipAuto)
-                .turnTo(129.0*Math.PI/180.0*flipAuto)
+                //.turnTo(129.0*Math.PI/180.0*flipAuto)
                 .waitSeconds(0.05); // first time moving to the shooting position
 
         Actions.runBlocking(
                 new SequentialAction(
                         new SleepAction(0.25),
-                        intake.stopIntakeBall(),
                         goToShootOne.build(),
+                        intake.stopIntakeBall(),
                         new SleepAction(0.01),
                         launcher.ShootBall(),
                         //intake.outtakeBall(),
