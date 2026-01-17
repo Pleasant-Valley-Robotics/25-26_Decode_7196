@@ -86,8 +86,8 @@ public class teleOpTwo extends OpMode {
 
     // here are all the values for the normal shooting velocity
     final double HIGH_LAUNCH = 1650;
-    final double LAUNCHER_TARGET_VELOCITY = 1200;
-    final double LAUNCHER_MIN_VELOCITY = 1050;
+    final double LAUNCHER_TARGET_VELOCITY = 1300;
+    final double LAUNCHER_MIN_VELOCITY = 1200;
 
     // here are all the values for indexing
     final double LAUNCHER_INDEX_TARGET_VELOCITY = 615.0;
@@ -374,9 +374,9 @@ public class teleOpTwo extends OpMode {
         }
 
         if (autoVelocity) {
-        //    targetVelocity = 5.1059 * GOAL_DISTANCE + (905.26);
-        //    selectedLaunchVelocity = targetVelocity;
-        //    launcher.setVelocity(selectedLaunchVelocity);
+            targetVelocity = 5.1059 * GOAL_DISTANCE + (905.26);
+            selectedLaunchVelocity = targetVelocity;
+            launcher.setVelocity(selectedLaunchVelocity);
         }
 
 

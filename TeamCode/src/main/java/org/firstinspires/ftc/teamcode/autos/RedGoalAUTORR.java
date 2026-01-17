@@ -36,11 +36,11 @@ public class RedGoalAUTORR extends LinearOpMode {
         while (!isStopRequested() && !opModeIsActive()) {
             //add anything for during initialization
             //telemetry.addData("Shots To Cycle", camera.findShotsToCycle());
-            if (gamepad1.x) {
+            if (gamepad1.b) {
                 flipAuto = 1;
                 alliance = Storage.Alliance.RED;
 
-            } else if (gamepad1.b){
+            } else if (gamepad1.x){
                 flipAuto = -1;
                 alliance = Storage.Alliance.BLUE;
 
@@ -51,7 +51,7 @@ public class RedGoalAUTORR extends LinearOpMode {
             telemetry.addData("Selected Alliance", alliance);
 
         }
-        Pose2d initialPose = new Pose2d(-55.135, 49.0834 * flipAuto, Math.toRadians(131.014)*flipAuto);
+        Pose2d initialPose = new Pose2d(-55.135, 49.0834 * flipAuto, Math.toRadians(131.014) * flipAuto);
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
         Launcher launcher = new Launcher(hardwareMap);
         Intake intake = new Intake(hardwareMap);
@@ -127,7 +127,7 @@ public class RedGoalAUTORR extends LinearOpMode {
         ); //moving to the first position to intake artifacts
 
         TrajectoryActionBuilder goToIntakeOneCollect = drive.actionBuilder(drive.localizer.getPose())
-                .lineToYConstantHeading(55.0*flipAuto)
+                .lineToYConstantHeading(57.0*flipAuto)
                 .waitSeconds(0.11); // First set of artifacts intaked
 
         Actions.runBlocking(
