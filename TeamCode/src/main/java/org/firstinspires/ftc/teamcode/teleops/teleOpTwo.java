@@ -37,29 +37,20 @@ import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
 import static org.firstinspires.ftc.teamcode.utility.Storage.alliance;
 
 import com.acmerobotics.roadrunner.Pose2d;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 
-import org.firstinspires.ftc.robotcontroller.external.samples.SampleRevBlinkinLedDriver;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.internal.system.Deadline;
 
-import org.firstinspires.ftc.teamcode.autos.RedGoalAUTORR;
-import org.firstinspires.ftc.teamcode.subsystems.Launcher;
-import org.firstinspires.ftc.teamcode.subsystems.Camera;
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive;
-import org.firstinspires.ftc.teamcode.roadrunner_essentials.*;
 import org.firstinspires.ftc.teamcode.utility.Storage;
-import org.firstinspires.ftc.vision.apriltag.AprilTagLibrary;
 
 
 /*
@@ -79,19 +70,19 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagLibrary;
 
 @TeleOp(name = "teleOpTwo", group = "StarterBot")
 public class teleOpTwo extends OpMode {
-    final double FEED_TIME_SECONDS = 0.60; //The feeder servos run this long when a shot is requested.
+    final double FEED_TIME_SECONDS = 0.50; //The feeder servos run this long when a shot is requested.
     final double STOP_SPEED = 0.0; //We send this power to the servos when we want them to stop.
     final double FULL_SPEED = 1.0;
     final double TURN_SPEED = 0.05;
 
     // here are all the values for the normal shooting velocity
-    final double HIGH_LAUNCH = 1650;
-    final double LAUNCHER_TARGET_VELOCITY = 1300;
-    final double LAUNCHER_MIN_VELOCITY = 1200;
+//    final double HIGH_LAUNCH = 1650;
+    final double LAUNCHER_TARGET_VELOCITY = 1100;
+    final double LAUNCHER_MIN_VELOCITY = 1000;
 
     // here are all the values for indexing
-    final double LAUNCHER_INDEX_TARGET_VELOCITY = 615.0;
-    final double LAUNCHER_INDEX_MIN_VELOCITY = 600.0;
+    final double LAUNCHER_INDEX_TARGET_VELOCITY = 600.0;
+    final double LAUNCHER_INDEX_MIN_VELOCITY = 575.0;
 
     /*
      * When we control our launcher motor, we are using encoders. These allow the control system
@@ -337,7 +328,6 @@ public class teleOpTwo extends OpMode {
 
         double GOAL_DISTANCE = Math.sqrt((X_DISTANCE * X_DISTANCE) + (Y_DISTANCE * Y_DISTANCE));
 
-
 // the values and equations of the auto lock part of the teleop
         double GoalHeading = (Math.atan2((GOAL_Y - mecanumDrive.localizer.getPose().position.y), GOAL_X - mecanumDrive.localizer.getPose().position.x) * (180.0/Math.PI));
         double AutoAimError = GoalHeading - (mecanumDrive.localizer.getPose().heading.toDouble() * (180.0/Math.PI));
@@ -350,34 +340,33 @@ public class teleOpTwo extends OpMode {
             autoAim = !autoAim;
         }
 
-        if (gamepad2.aWasPressed()) {
-            intake.setPower(0.25);
-        }
-
+//        if (gamepad2.aWasPressed()) {
+//            intake.setPower(0.25);
+//        }
 
 // resets the robot's zero position to however it currently is on the field
         if (gamepad1.bWasPressed()) {
             mecanumDrive.localizer.setPose(new Pose2d(0.0,0.0, 0.0));
         }
 
-        if(gamepad2.y) {
-            selectedLaunchVelocity = HIGH_LAUNCH;
-            launcher.setVelocity(selectedLaunchVelocity);
-        } else if (gamepad2.a) {
-            selectedLaunchVelocity = LAUNCHER_TARGET_VELOCITY;
-            launcher.setVelocity(selectedLaunchVelocity);
-        } else if (gamepad2.xWasPressed()) {
-            autoVelocity = !autoVelocity;
-        } else if (gamepad2.b) {
+//        if(gamepad2.y) {
+//            selectedLaunchVelocity = HIGH_LAUNCH;
+//            launcher.setVelocity(selectedLaunchVelocity);
+//        } else if (gamepad2.x) {
+//            selectedLaunchVelocity = LAUNCHER_TARGET_VELOCITY;
+//            launcher.setVelocity(selectedLaunchVelocity);
+//        } else if (gamepad2.xWasPressed()) {
+//            autoVelocity = !autoVelocity;
+        if (gamepad2.b) {
             selectedLaunchVelocity = 0.0;
             launcher.setVelocity(selectedLaunchVelocity);
-        }
+            }
 
-        if (autoVelocity) {
-            targetVelocity = 5.1059 * GOAL_DISTANCE + (905.26);
-            selectedLaunchVelocity = targetVelocity;
-            launcher.setVelocity(selectedLaunchVelocity);
-        }
+//        if (autoVelocity) {
+//            targetVelocity = 5.1059 * GOAL_DISTANCE + (905.26);
+//            selectedLaunchVelocity = targetVelocity;
+//            launcher.setVelocity(selectedLaunchVelocity);
+//        }
 
 
         if (!autoAim) {
@@ -388,14 +377,15 @@ public class teleOpTwo extends OpMode {
         else {
             mecanumDrive(-gamepad1.left_stick_y * driveMultiplier, gamepad1.left_stick_x * driveMultiplier, AutoAimPower);
         }
-        double intakePower = -gamepad2.left_stick_y;
+
+//        double intakePower = -gamepad2.left_stick_y;
         // These are the statements that indicate what to do if the robot's position is in a certain part of the field
 
         if (GOAL_DISTANCE <= 57.7246) {
-            pattern = RevBlinkinLedDriver.BlinkinPattern.STROBE_RED;
+            pattern = RevBlinkinLedDriver.BlinkinPattern.HOT_PINK;
             blinkinLedDriver.setPattern(pattern);
         } else {
-            pattern = RevBlinkinLedDriver.BlinkinPattern.TWINKLES_OCEAN_PALETTE;
+            pattern = RevBlinkinLedDriver.BlinkinPattern.ORANGE;
             blinkinLedDriver.setPattern(pattern);
         }
 
@@ -403,7 +393,6 @@ public class teleOpTwo extends OpMode {
         index(gamepad2.leftBumperWasPressed());
         intake.setPower(intakePower);
         intake.setPower(-gamepad2.left_stick_y);
-        launcher.setPower(-gamepad2.right_stick_y);
 
         //telemetry.addData("State", launchState);
         //telemetry.addData("Motors", "left (%.2f), right (%.2f)", frontLeftPower, backLeftPower, frontRightPower, backRightPower);
