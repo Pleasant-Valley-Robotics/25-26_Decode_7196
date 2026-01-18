@@ -146,9 +146,9 @@ public class GoalAUTORR extends LinearOpMode {
                         intake.stopIntakeBall(),
                         launcher.ShootBall(),
                         intake.outtakeBall(),
-                        new SleepAction(0.2),
+                        new SleepAction(0.35),
                         intake.intakeBall(),
-                        new SleepAction(0.1),
+                        new SleepAction(0.25),
                         intake.stopIntakeBall(),
                         new SleepAction(0.01),
                         launcher.ShootBall(),
@@ -159,7 +159,7 @@ public class GoalAUTORR extends LinearOpMode {
         Vector2d intakeTwo = new Vector2d(12.0, 30.0 * flipAuto);
         TrajectoryActionBuilder goToIntakeTwo = drive.actionBuilder(drive.localizer.getPose())
                 .strafeToLinearHeading(intakeTwo, Math.toRadians(90.0) * flipAuto)
-                //.turnTo(Math.toRadians(90)*flipAuto)
+                //.turnTo(Math.toRadians(90) * flipAuto)
                 .waitSeconds(0.01); //First set of artifacts
 
         Actions.runBlocking(
@@ -198,40 +198,38 @@ public class GoalAUTORR extends LinearOpMode {
                         intake.stopIntakeBall(),
                         launcher.ShootBall(),
                         intake.outtakeBall(),
-                        new SleepAction(0.2),
+                        new SleepAction(0.3),
                         intake.intakeBall(),
-                        new SleepAction(0.1),
+                        new SleepAction(0.25),
                         intake.stopIntakeBall(),
                         new SleepAction(0.01),
                         launcher.ShootBall(),
                         new SleepAction(0.01)
                 )
         ); // robot shoots the second round of artifacts after intaking
-//
-//
-//        Vector2d intakeEnd = new Vector2d(36.0, 33.0*flipAuto);
-//        TrajectoryActionBuilder goToIntakeEnd = drive.actionBuilder(drive.localizer.getPose())
-//                .strafeToLinearHeading(intakeEnd, Math.toRadians(90.0)*flipAuto)
-//                .waitSeconds(0.01); //Second set of artifacts
-//
-//        Actions.runBlocking(
-//                new SequentialAction(
-//                        goToIntakeEnd.build()
-//                )
-//        );
-//
-//        Vector2d intakeEndCollect = new Vector2d(36.0224, 60.3667*flipAuto);
-//        TrajectoryActionBuilder goToIntakeEndCollect = drive.actionBuilder(drive.localizer.getPose())
-//                //.strafeToLinearHeading(intakeTwoCollect, Math.toRadians(90.0))
-//                .lineToYConstantHeading(53.0*flipAuto)
-//                .waitSeconds(0.01); //Second set of artifacts intaked
-//
-//        Actions.runBlocking(
-//                new SequentialAction((
-//                        intake.intakeBall()),
-//                        goToIntakeEndCollect.build()
-//                )
-//            );
+
+        Vector2d intakeThree = new Vector2d(36.0, 30.0 * flipAuto);
+        TrajectoryActionBuilder goToIntakeThree = drive.actionBuilder(drive.localizer.getPose())
+                .strafeToLinearHeading(intakeThree, Math.toRadians(90.0) * flipAuto)
+                //.turnTo(Math.toRadians(90) * flipAuto)
+                .waitSeconds(0.01); //First set of artifacts
+
+        Actions.runBlocking(
+                new SequentialAction(
+                        goToIntakeThree.build()
+                )
+        ); //moving to the first position to intake artifacts
+
+        TrajectoryActionBuilder goToIntakeThreeCollect = drive.actionBuilder(drive.localizer.getPose())
+                .lineToYConstantHeading(45.0 * flipAuto)
+                .waitSeconds(0.1); // First set of artifacts intaked
+
+        Actions.runBlocking(
+                new SequentialAction((
+                        intake.intakeBall()),
+                        goToIntakeThreeCollect.build()
+                )
+        ); // The robot moves forward as it collects the artifacts
 
         /*
         TrajectoryActionBuilder goToEnd = drive.actionBuilder(drive.localizer.getPose())
