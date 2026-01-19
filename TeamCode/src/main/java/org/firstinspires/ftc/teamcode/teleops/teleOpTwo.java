@@ -49,8 +49,10 @@ import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.internal.system.Deadline;
 
+import org.firstinspires.ftc.teamcode.subsystems.Launcher;
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive;
 import org.firstinspires.ftc.teamcode.utility.Storage;
+import org.firstinspires.ftc.teamcode.subsystems.Intake;
 
 
 /*
@@ -77,12 +79,12 @@ public class teleOpTwo extends OpMode {
 
     // here are all the values for the normal shooting velocity
 //    final double HIGH_LAUNCH = 1650;
-    final double LAUNCHER_TARGET_VELOCITY = 1100;
-    final double LAUNCHER_MIN_VELOCITY = 1000;
+    final double LAUNCHER_TARGET_VELOCITY = 1200;
+    final double LAUNCHER_MIN_VELOCITY = 1100;
 
     // here are all the values for indexing
-    final double LAUNCHER_INDEX_TARGET_VELOCITY = 600.0;
-    final double LAUNCHER_INDEX_MIN_VELOCITY = 575.0;
+    final double LAUNCHER_INDEX_TARGET_VELOCITY = 200.0;
+    final double LAUNCHER_INDEX_MIN_VELOCITY = 100.0;
 
     /*
      * When we control our launcher motor, we are using encoders. These allow the control system
@@ -148,8 +150,16 @@ public class teleOpTwo extends OpMode {
         STOP_INDEX
 
     }
+
+    private enum ReverseBallState {
+        IDLE_REVERSE,
+        START_REVERSE,
+        LAUNCH_REVERSE,
+        STOP_REVERSE
+    }
     private LaunchState launchState;
     private IndexState indexState;
+    private ReverseBallState reverseBallState;
 
     // Setup a variable for each drive wheel to save power level for telemetry
     double frontLeftPower;
@@ -175,6 +185,7 @@ public class teleOpTwo extends OpMode {
     public void init() {
         launchState = LaunchState.IDLE;
         indexState = IndexState.IDLE_INDEX;
+        reverseBallState = ReverseBallState.IDLE_REVERSE;
 
         /*
          * Initialize the hardware variables. Note that the strings used here as parameters
@@ -349,17 +360,10 @@ public class teleOpTwo extends OpMode {
             mecanumDrive.localizer.setPose(new Pose2d(0.0,0.0, 0.0));
         }
 
-//        if(gamepad2.y) {
-//            selectedLaunchVelocity = HIGH_LAUNCH;
-//            launcher.setVelocity(selectedLaunchVelocity);
-//        } else if (gamepad2.x) {
-//            selectedLaunchVelocity = LAUNCHER_TARGET_VELOCITY;
-//            launcher.setVelocity(selectedLaunchVelocity);
 //        } else if (gamepad2.xWasPressed()) {
 //            autoVelocity = !autoVelocity;
         if (gamepad2.b) {
-            selectedLaunchVelocity = 0.0;
-            launcher.setVelocity(selectedLaunchVelocity);
+            launcher.setVelocity(STOP_SPEED);
             }
 
 //        if (autoVelocity) {
@@ -502,11 +506,48 @@ public class teleOpTwo extends OpMode {
             }
         } // end of launch void
 
+//    void inOutBall(boolean shotRequested) {
+//        switch (inOutBallState) {
+//            case IDLE_BALL:
+//                if (shotRequested) {
+//                    reverseBallState = ReverseBallState.OUT_BALL;
+//                    break;
+//                }
+//            case OUT_BALL:
+//                launcher.setVelocity(400.0);
+//                if (launcher.getVelocity() > 300.0) {
+//                    reverseBallState = ReverseBallState.IN_BALL;
+//                }
+//                break;
+//
+//            case IN_BALL:
+//                leftFeeder.setPower(FULL_SPEED);
+//                rightFeeder.setPower(FULL_SPEED);
+//                feederTimer.reset();
+//                reverseBallState = ReverseBallState.STOP_BALL;
+//                break;
+//
+//            case STOP_BALL:
+//                if (feederTimer.seconds() > FEED_TIME_SECONDS) {
+//                    launchState = LaunchState.IDLE;
+//                    leftFeeder.setPower(STOP_SPEED);
+//                    rightFeeder.setPower(STOP_SPEED);
+//                    launcher.setDirection(DcMotorSimple.Direction.FORWARD);
+//                    leftFeeder.setDirection(DcMotorSimple.Direction.FORWARD);
+//                    rightFeeder.setDirection(DcMotorSimple.Direction.REVERSE);
+//                }
+//                break;
+//        }
+//    } // end of launch void
+
 //Here is the indexing part of the TeleOp
     void index(boolean indexRequested) {
         switch (indexState) {
             case IDLE_INDEX:
                 if (indexRequested) {
+                    launcher.setDirection(DcMotorSimple.Direction.REVERSE);
+                    leftFeeder.setDirection(DcMotorSimple.Direction.REVERSE);
+                    rightFeeder.setDirection(DcMotorSimple.Direction.FORWARD);
                     indexState = IndexState.START_INDEX;
                 }
                 break;

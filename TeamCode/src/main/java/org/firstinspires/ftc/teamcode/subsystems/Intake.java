@@ -11,6 +11,8 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import java.io.OutputStream;
+
 public class Intake {
     private DcMotorEx intake;
 
@@ -67,7 +69,7 @@ public class Intake {
 
             double tim = intakeTimer.seconds();
             packet.put("intakeTimer", tim);
-            intake.setPower(-.5);
+            intake.setPower(-0.5);
             if (tim > 0.20) {
                 intake.setPower(0.0);
                 return false;
@@ -110,4 +112,39 @@ public class Intake {
         return new Intake.stopIntakeBall();
     }
 
+    public class inOutBall implements Action {
+        private boolean initialized = false;
+
+        @Override
+        public boolean run(@NonNull TelemetryPacket packet) {
+            if (!initialized) {
+                initialized = true;
+                intake.setPower(0.0);
+                intakeTimer.reset();
+                intakeTimer.startTime();
+            }
+
+            double outTim = intakeTimer.seconds();
+            packet.put("intakeTimer", outTim);
+            intake.setPower(-0.5);
+            if (outTim > 0.20) {
+                intake.setPower(0.0);
+                return false;
+            }
+
+            double inTim = intakeTimer.seconds();
+            packet.put("intakeTimer", inTim);
+            intake.setPower(0.75);
+            if (inTim > 1.0) {
+                intake.setPower(0.0);
+                return false;
+            }
+            return true;
+        } // end of inOuttakeBall action
+
+        public Action inOutBall() {
+            return new Intake.inOutBall();
+        }
+
+    }
 } // end of Intake class
