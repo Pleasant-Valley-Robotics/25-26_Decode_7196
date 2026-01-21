@@ -79,8 +79,8 @@ public class teleOpTwo extends OpMode {
 
     // here are all the values for the normal shooting velocity
 //    final double HIGH_LAUNCH = 1650;
-    final double LAUNCHER_TARGET_VELOCITY = 1200;
-    final double LAUNCHER_MIN_VELOCITY = 1100;
+    final double LAUNCHER_TARGET_VELOCITY = 1100;
+    final double LAUNCHER_MIN_VELOCITY = 1000;
 
     // here are all the values for indexing
     final double LAUNCHER_INDEX_TARGET_VELOCITY = 200.0;
@@ -326,7 +326,7 @@ public class teleOpTwo extends OpMode {
         double driveMultiplier = gamepad1.right_bumper ? TURN_SPEED : FULL_SPEED;
 
 //here is where the goal location values are differentiated for the two different alliances
-        if(alliance == Storage.Alliance.BLUE) {
+        if (alliance == Storage.Alliance.BLUE) {
             GOAL_Y = -72.0;
         }
         else if(alliance == Storage.Alliance.RED) {
@@ -334,13 +334,13 @@ public class teleOpTwo extends OpMode {
         }
 
 // these are the values and equations to calculate the velocity
-        double X_DISTANCE = GOAL_X - mecanumDrive.localizer.getPose().position.x;
-        double Y_DISTANCE = GOAL_Y - mecanumDrive.localizer.getPose().position.y;
+        double X_DISTANCE = (GOAL_X - mecanumDrive.localizer.getPose().position.x);
+        double Y_DISTANCE = (GOAL_Y - mecanumDrive.localizer.getPose().position.y);
 
         double GOAL_DISTANCE = Math.sqrt((X_DISTANCE * X_DISTANCE) + (Y_DISTANCE * Y_DISTANCE));
 
 // the values and equations of the auto lock part of the teleop
-        double GoalHeading = (Math.atan2((GOAL_Y - mecanumDrive.localizer.getPose().position.y), GOAL_X - mecanumDrive.localizer.getPose().position.x) * (180.0/Math.PI));
+        double GoalHeading = ((Math.atan2((GOAL_Y - mecanumDrive.localizer.getPose().position.y), GOAL_X - mecanumDrive.localizer.getPose().position.x) * (180.0/Math.PI)));
         double AutoAimError = GoalHeading - (mecanumDrive.localizer.getPose().heading.toDouble() * (180.0/Math.PI));
         while (AutoAimError > 180) AutoAimError -= 360;
         while (AutoAimError <= -180) AutoAimError += 360;

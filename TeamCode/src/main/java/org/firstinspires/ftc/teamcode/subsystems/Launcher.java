@@ -104,11 +104,24 @@ public class IndexBall implements Action {
             feederTimer.reset();
             feederTimer.startTime();
         }
-        if (feederTimer.seconds() > 0.15){
+        if (feederTimer.seconds() > 0.15) {
             leftFeeder.setPower(1.0);
             rightFeeder.setPower(1.0);
         }
         if (feederTimer.seconds() > 0.55) {
+            leftFeeder.setDirection(DcMotorSimple.Direction.REVERSE);
+            rightFeeder.setDirection(DcMotorSimple.Direction.FORWARD);
+            leftFeeder.setPower(1.0);
+            rightFeeder.setPower(1.0);
+            launcher.setVelocity(0.0);
+        }
+        if (feederTimer.seconds() > 0.15) {
+            leftFeeder.setPower(1.0);
+            rightFeeder.setPower(1.0);
+        }
+        if (feederTimer.seconds() > 0.55) {
+            leftFeeder.setDirection(DcMotorSimple.Direction.FORWARD);
+            rightFeeder.setDirection(DcMotorSimple.Direction.REVERSE);
             leftFeeder.setPower(0.0);
             rightFeeder.setPower(0.0);
             launcher.setVelocity(0.0);
