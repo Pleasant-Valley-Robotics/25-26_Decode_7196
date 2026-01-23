@@ -79,12 +79,12 @@ public class teleOpTwo extends OpMode {
 
     // here are all the values for the normal shooting velocity
 //    final double HIGH_LAUNCH = 1650;
-    final double LAUNCHER_TARGET_VELOCITY = 1100;
-    final double LAUNCHER_MIN_VELOCITY = 1000;
+    final double LAUNCHER_TARGET_VELOCITY = 1300;
+    final double LAUNCHER_MIN_VELOCITY = 1275;
 
     // here are all the values for indexing
-    final double LAUNCHER_INDEX_TARGET_VELOCITY = 200.0;
-    final double LAUNCHER_INDEX_MIN_VELOCITY = 100.0;
+    final double LAUNCHER_INDEX_TARGET_VELOCITY = 600.0;
+    final double LAUNCHER_INDEX_MIN_VELOCITY = 585.0;
 
     /*
      * When we control our launcher motor, we are using encoders. These allow the control system
@@ -169,7 +169,7 @@ public class teleOpTwo extends OpMode {
     public MecanumDrive mecanumDrive;
     double selectedLaunchVelocity = 0;
 
-// here are the values for auto locking and the automatic velocity calcluation
+// here are the values for auto locking and the automatic velocity calcuation
     boolean autoAim = false;
     boolean autoVelocity = false;
     double P_autoAim = 1.0/30.0;
@@ -475,7 +475,6 @@ public class teleOpTwo extends OpMode {
         backRightDrive.setPower(backRightPower);
     }
     */
-
 
     void launch(boolean shotRequested) {
         switch (launchState) {
