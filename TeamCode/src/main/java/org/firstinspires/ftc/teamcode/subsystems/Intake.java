@@ -45,7 +45,7 @@ public class Intake {
                 intake.setPower(0.0);
                 return false;
             }*/
-            intake.setPower(0.75);
+            intake.setPower(1.0);
             return false;
         }
     } // end of intakeBall action

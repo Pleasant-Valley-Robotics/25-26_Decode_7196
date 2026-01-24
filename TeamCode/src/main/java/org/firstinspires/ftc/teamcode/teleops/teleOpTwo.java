@@ -151,15 +151,15 @@ public class teleOpTwo extends OpMode {
 
     }
 
-    private enum ReverseBallState {
-        IDLE_REVERSE,
-        START_REVERSE,
-        LAUNCH_REVERSE,
-        STOP_REVERSE
+    private enum InOutBallState {
+        IDLE_BALL,
+        OUT_BALL,
+        IN_BALL,
+        STOP_BALL
     }
     private LaunchState launchState;
     private IndexState indexState;
-    private ReverseBallState reverseBallState;
+    private InOutBallState inOutBallState;
 
     // Setup a variable for each drive wheel to save power level for telemetry
     double frontLeftPower;
@@ -169,7 +169,7 @@ public class teleOpTwo extends OpMode {
     public MecanumDrive mecanumDrive;
     double selectedLaunchVelocity = 0;
 
-// here are the values for auto locking and the automatic velocity calcuation
+// here are the values for auto locking and the automatic velocity calculation
     boolean autoAim = false;
     boolean autoVelocity = false;
     double P_autoAim = 1.0/30.0;
@@ -185,7 +185,7 @@ public class teleOpTwo extends OpMode {
     public void init() {
         launchState = LaunchState.IDLE;
         indexState = IndexState.IDLE_INDEX;
-        reverseBallState = ReverseBallState.IDLE_REVERSE;
+        inOutBallState = InOutBallState.IDLE_BALL;
 
         /*
          * Initialize the hardware variables. Note that the strings used here as parameters
@@ -366,12 +366,11 @@ public class teleOpTwo extends OpMode {
             launcher.setVelocity(STOP_SPEED);
             }
 
-//        if (autoVelocity) {
-//            targetVelocity = 5.1059 * GOAL_DISTANCE + (905.26);
-//            selectedLaunchVelocity = targetVelocity;
-//            launcher.setVelocity(selectedLaunchVelocity);
-//        }
-
+        if (autoVelocity) {
+            targetVelocity = 5.597593546703752 * GOAL_DISTANCE + (824.33028096);
+            selectedLaunchVelocity = targetVelocity;
+            launcher.setVelocity(selectedLaunchVelocity);
+        }
 
         if (!autoAim) {
             mecanumDrive(
@@ -395,6 +394,7 @@ public class teleOpTwo extends OpMode {
 
         launch(gamepad2.rightBumperWasPressed());
         index(gamepad2.leftBumperWasPressed());
+        //inOutBall(gamepad1.aWasPressed());
         intake.setPower(intakePower);
         intake.setPower(-gamepad2.left_stick_y);
 
@@ -509,31 +509,28 @@ public class teleOpTwo extends OpMode {
 //        switch (inOutBallState) {
 //            case IDLE_BALL:
 //                if (shotRequested) {
-//                    reverseBallState = ReverseBallState.OUT_BALL;
+//                    inOutBallState = InOutBallState.OUT_BALL;
 //                    break;
 //                }
 //            case OUT_BALL:
-//                launcher.setVelocity(400.0);
-//                if (launcher.getVelocity() > 300.0) {
-//                    reverseBallState = ReverseBallState.IN_BALL;
+//                intake.setDirection(DcMotorSimple.Direction.FORWARD);
+//                intake.setPower(0.1);
+//                if (feederTimer.seconds() > 0.3) {
+//                    inOutBallState = InOutBallState.IN_BALL;
+//                    break;
 //                }
-//                break;
-//
 //            case IN_BALL:
-//                leftFeeder.setPower(FULL_SPEED);
-//                rightFeeder.setPower(FULL_SPEED);
+//                intake.setDirection(DcMotorSimple.Direction.REVERSE);
 //                feederTimer.reset();
-//                reverseBallState = ReverseBallState.STOP_BALL;
-//                break;
-//
+//                intake.setPower(1.0);
+//                if (feederTimer.seconds() > 0.5) {
+//                    inOutBallState = InOutBallState.STOP_BALL;
+//                    break;
+//                }
 //            case STOP_BALL:
 //                if (feederTimer.seconds() > FEED_TIME_SECONDS) {
-//                    launchState = LaunchState.IDLE;
-//                    leftFeeder.setPower(STOP_SPEED);
-//                    rightFeeder.setPower(STOP_SPEED);
-//                    launcher.setDirection(DcMotorSimple.Direction.FORWARD);
-//                    leftFeeder.setDirection(DcMotorSimple.Direction.FORWARD);
-//                    rightFeeder.setDirection(DcMotorSimple.Direction.REVERSE);
+//                    feederTimer.reset();
+//                    inOutBallState = InOutBallState.IDLE_BALL;
 //                }
 //                break;
 //        }
