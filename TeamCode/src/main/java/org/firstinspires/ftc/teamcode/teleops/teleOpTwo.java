@@ -53,6 +53,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Launcher;
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive;
 import org.firstinspires.ftc.teamcode.utility.Storage;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
+import org.firstinspires.ftc.teamcode.autos.*;
 
 
 /*
@@ -78,7 +79,8 @@ public class teleOpTwo extends OpMode {
     final double TURN_SPEED = 0.05;
 
     // here are all the values for the normal shooting velocity
-//    final double HIGH_LAUNCH = 1650;
+
+    final double HIGH_LAUNCH = 1650;
     final double LAUNCHER_TARGET_VELOCITY = 1300;
     final double LAUNCHER_MIN_VELOCITY = 1275;
 
@@ -201,7 +203,11 @@ public class teleOpTwo extends OpMode {
         intake = hardwareMap.get(DcMotor.class, "intake");
         leftFeeder = hardwareMap.get(CRServo.class, "leftFeeder");
         rightFeeder = hardwareMap.get(CRServo.class, "rightFeeder");
-        mecanumDrive = new MecanumDrive(hardwareMap, Storage.pose);
+        if (Storage.autoRan == Storage.AutoRan.GOAL) {
+            mecanumDrive = new MecanumDrive(hardwareMap, GoalAUTORR.drive.localizer.getPose());
+        } else if (Storage.autoRan == Storage.AutoRan.SMALLTRIANGLE) {
+            mecanumDrive = new MecanumDrive(hardwareMap, SmallTriangleAUTORR.drive.localizer.getPose());
+        }
         blinkinLedDriver = hardwareMap.get(RevBlinkinLedDriver.class, "blinkin");
 
 
@@ -366,10 +372,21 @@ public class teleOpTwo extends OpMode {
             launcher.setVelocity(STOP_SPEED);
             }
 
+        if(gamepad2.y) {
+            selectedLaunchVelocity = HIGH_LAUNCH;
+        } else if (gamepad2.a) {
+            selectedLaunchVelocity = LAUNCHER_TARGET_VELOCITY;
+        }
+
         if (autoVelocity) {
             targetVelocity = 5.597593546703752 * GOAL_DISTANCE + (824.33028096);
             selectedLaunchVelocity = targetVelocity;
-            launcher.setVelocity(selectedLaunchVelocity);
+        }
+
+        launcher.setVelocity(selectedLaunchVelocity);
+
+        if (gamepad2.b) {
+            launcher.setVelocity(STOP_SPEED);
         }
 
         if (!autoAim) {

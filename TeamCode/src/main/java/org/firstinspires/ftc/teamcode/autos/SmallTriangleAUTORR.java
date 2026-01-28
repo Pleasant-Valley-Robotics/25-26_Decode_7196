@@ -22,6 +22,7 @@ import org.firstinspires.ftc.teamcode.utility.Storage;
 @Autonomous(name = "SmallTriangleAUTORR", group = "Autonomous")
 public class SmallTriangleAUTORR extends LinearOpMode {
     int flipAuto = 1;
+    public static MecanumDrive drive;
     @Override
     public void runOpMode() {
 
@@ -42,9 +43,9 @@ public class SmallTriangleAUTORR extends LinearOpMode {
             telemetry.addData("Press B","for RED");
             telemetry.addData("Selected Alliance", alliance);
         }
-
+        Storage.autoRan = Storage.AutoRan.SMALLTRIANGLE;
         Pose2d initialPose = new Pose2d(63.9414, 12.4463 * flipAuto, Math.toRadians(179.984) * flipAuto);
-        MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
+        drive = new MecanumDrive(hardwareMap, initialPose);
         Launcher launcher = new Launcher(hardwareMap);
         Intake intake = new Intake(hardwareMap);
         Camera camera = new Camera(hardwareMap);
@@ -242,6 +243,5 @@ public class SmallTriangleAUTORR extends LinearOpMode {
                 goToEnd.build()
         );
         */
-        Storage.pose = drive.localizer.getPose();
     }
 }

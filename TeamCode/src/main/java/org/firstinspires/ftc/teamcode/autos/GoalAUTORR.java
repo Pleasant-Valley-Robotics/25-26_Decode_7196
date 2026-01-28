@@ -20,6 +20,7 @@ import org.firstinspires.ftc.teamcode.utility.Storage;
 @Autonomous(name = "GoalAUTORR", group = "Autonomous")
 public class GoalAUTORR extends LinearOpMode {
     int flipAuto = 1;
+    public static MecanumDrive drive;
     @Override
     public void runOpMode() {
 
@@ -40,9 +41,9 @@ public class GoalAUTORR extends LinearOpMode {
             telemetry.addData("Press B","for RED");
             telemetry.addData("Selected Alliance", alliance);
         }
-
+        Storage.autoRan = Storage.AutoRan.GOAL;
         Pose2d initialPose = new Pose2d(-55.135, 49.0834 * flipAuto, Math.toRadians(131.014) * flipAuto);
-        MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
+        drive = new MecanumDrive(hardwareMap, initialPose);
         Launcher launcher = new Launcher(hardwareMap);
         Intake intake = new Intake(hardwareMap);
         Camera camera = new Camera(hardwareMap);
@@ -240,6 +241,5 @@ public class GoalAUTORR extends LinearOpMode {
                 goToEnd.build()
         );
         */
-        Storage.pose = drive.localizer.getPose();
     }
 }
