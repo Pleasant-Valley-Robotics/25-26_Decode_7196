@@ -314,6 +314,11 @@ public class teleOpTwo extends OpMode {
     public void loop() {
 // updates the robots position constantly
         mecanumDrive.updatePoseEstimate();
+        if (Storage.autoRan == Storage.AutoRan.GOAL) {
+            GoalAUTORR.drive.localizer.setPose(mecanumDrive.localizer.getPose());
+        } else if (Storage.autoRan == Storage.AutoRan.SMALLTRIANGLE) {
+            SmallTriangleAUTORR.drive.localizer.setPose(mecanumDrive.localizer.getPose());
+        }
 
         /*
          * Here we call a function called arcadeDrive. The arcadeDrive function takes the input from
