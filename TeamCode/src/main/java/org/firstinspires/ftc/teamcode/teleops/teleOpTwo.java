@@ -161,7 +161,7 @@ public class teleOpTwo extends OpMode {
     }
     private LaunchState launchState;
     private IndexState indexState;
-    private InOutBallState inOutBallState;
+//    private InOutBallState inOutBallState;
 
     // Setup a variable for each drive wheel to save power level for telemetry
     double frontLeftPower;
@@ -186,7 +186,7 @@ public class teleOpTwo extends OpMode {
     public void init() {
         launchState = LaunchState.IDLE;
         indexState = IndexState.IDLE_INDEX;
-        inOutBallState = InOutBallState.IDLE_BALL;
+//        inOutBallState = InOutBallState.IDLE_BALL;
 
         /*
          * Initialize the hardware variables. Note that the strings used here as parameters
@@ -314,12 +314,6 @@ public class teleOpTwo extends OpMode {
     public void loop() {
 // updates the robots position constantly
         mecanumDrive.updatePoseEstimate();
-        if (Storage.autoRan == Storage.AutoRan.GOAL) {
-            GoalAUTORR.drive.localizer.setPose(mecanumDrive.localizer.getPose());
-        } else if (Storage.autoRan == Storage.AutoRan.SMALLTRIANGLE) {
-            SmallTriangleAUTORR.drive.localizer.setPose(mecanumDrive.localizer.getPose());
-        }
-
         /*
          * Here we call a function called arcadeDrive. The arcadeDrive function takes the input from
          * the joysticks, and applies power to the left and right drive motor to move the robot
@@ -383,7 +377,7 @@ public class teleOpTwo extends OpMode {
         }
 
         if (gamepad2.y) {
-            selectedLaunchVelocity = STOP_SPEED;
+            launcher.setPower(0.0);
         }
 
         launcher.setVelocity(selectedLaunchVelocity);
