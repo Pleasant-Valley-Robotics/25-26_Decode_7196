@@ -118,7 +118,7 @@ public class GoalAUTORR extends LinearOpMode {
         ); //moving to the first position to intake artifacts
 
         TrajectoryActionBuilder goToIntakeOneCollect = drive.actionBuilder(drive.localizer.getPose())
-                .lineToYConstantHeading(45.0 * flipAuto)
+                .lineToYConstantHeading(43.0 * flipAuto)
                 .waitSeconds(0.1); // First set of artifacts intaked
 
         Actions.runBlocking(
@@ -146,10 +146,11 @@ public class GoalAUTORR extends LinearOpMode {
                         new SleepAction(0.1),
                         intake.stopIntakeBall(),
                         launcher.ShootBall(),
+                        new SleepAction(0.15),
                         intake.outtakeBall(),
                         new SleepAction(0.35),
                         intake.intakeBall(),
-                        new SleepAction(0.25),
+                        new SleepAction(0.35),
                         intake.stopIntakeBall(),
                         new SleepAction(0.01),
                         launcher.ShootBall(),
@@ -201,7 +202,7 @@ public class GoalAUTORR extends LinearOpMode {
                         intake.outtakeBall(),
                         new SleepAction(0.3),
                         intake.intakeBall(),
-                        new SleepAction(0.25),
+                        new SleepAction(0.3),
                         intake.stopIntakeBall(),
                         new SleepAction(0.01),
                         launcher.ShootBall(),

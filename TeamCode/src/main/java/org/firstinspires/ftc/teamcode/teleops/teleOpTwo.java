@@ -173,10 +173,9 @@ public class teleOpTwo extends OpMode {
 
 // here are the values for auto locking and the automatic velocity calculation
     boolean autoAim = false;
-    boolean autoVelocity = false;
     double P_autoAim = 1.0/30.0;
     double targetVelocity = 0.0;
-
+    boolean autoVelocity = false;
     double intakePower = 0.0;
 
     /*
@@ -205,7 +204,7 @@ public class teleOpTwo extends OpMode {
         rightFeeder = hardwareMap.get(CRServo.class, "rightFeeder");
         if (Storage.autoRan == Storage.AutoRan.GOAL) {
             mecanumDrive = new MecanumDrive(hardwareMap, GoalAUTORR.drive.localizer.getPose());
-        } else if (Storage.autoRan == Storage.AutoRan.SMALLTRIANGLE) {
+        } else if (Storage.autoRan == Storage.AutoRan.SMALL_TRIANGLE) {
             mecanumDrive = new MecanumDrive(hardwareMap, SmallTriangleAUTORR.drive.localizer.getPose());
         }
         blinkinLedDriver = hardwareMap.get(RevBlinkinLedDriver.class, "blinkin");
@@ -344,7 +343,6 @@ public class teleOpTwo extends OpMode {
         double Y_DISTANCE = (GOAL_Y - mecanumDrive.localizer.getPose().position.y);
 
         double GOAL_DISTANCE = Math.sqrt((X_DISTANCE * X_DISTANCE) + (Y_DISTANCE * Y_DISTANCE));
-        double targetVelocity = 5.597593546703752 * GOAL_DISTANCE + (824.33028096);
 
 // the values and equations of the auto lock part of the teleop
         double GoalHeading = ((Math.atan2((GOAL_Y - mecanumDrive.localizer.getPose().position.y), GOAL_X - mecanumDrive.localizer.getPose().position.x) * (180.0/Math.PI)));
@@ -358,33 +356,32 @@ public class teleOpTwo extends OpMode {
             autoAim = !autoAim;
         }
 
+        if (autoVelocity) {
+            targetVelocity = 5.453091946754939 * GOAL_DISTANCE + (952.3013482434122);
+            selectedLaunchVelocity = targetVelocity;
+            launcher.setVelocity(selectedLaunchVelocity);
+        }
+
 //        if (gamepad2.aWasPressed()) {
 //            intake.setPower(0.25);
 //        }
 
 // resets the robot's zero position to however it currently is on the field
-        if (gamepad1.bWasPressed()) {
-            mecanumDrive.localizer.setPose(new Pose2d(0.0,0.0, 0.0));
-        }
+//        if (gamepad1.bWasPressed()) {
+//            mecanumDrive.localizer.setPose(new Pose2d(0.0,0.0, 0.0));
+//        }
 
 //        } else if (gamepad2.xWasPressed()) {
 //            autoVelocity = !autoVelocity;
-
-        if(gamepad2.y) {
-            selectedLaunchVelocity = HIGH_LAUNCH;
-        } else if (gamepad2.a) {
-            selectedLaunchVelocity = LAUNCHER_TARGET_VELOCITY;
+        if (gamepad2.xWasPressed()) {
+            autoVelocity = !autoVelocity;
         }
 
-        if (gamepad2.xWasPressed()) {
-            selectedLaunchVelocity = targetVelocity;
+        if (gamepad2.y) {
+            selectedLaunchVelocity = STOP_SPEED;
         }
 
         launcher.setVelocity(selectedLaunchVelocity);
-
-        if (gamepad2.b) {
-            launcher.setVelocity(STOP_SPEED);
-        }
 
         if (!autoAim) {
             mecanumDrive(

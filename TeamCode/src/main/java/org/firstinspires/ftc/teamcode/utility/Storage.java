@@ -11,7 +11,7 @@ public class Storage {
 
     public static enum AutoRan {
         GOAL,
-        SMALLTRIANGLE
+        SMALL_TRIANGLE
     }
 
     public static AutoRan autoRan = AutoRan.GOAL;

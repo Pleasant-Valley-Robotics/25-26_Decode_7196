@@ -43,7 +43,7 @@ public class SmallTriangleAUTORR extends LinearOpMode {
             telemetry.addData("Press B","for RED");
             telemetry.addData("Selected Alliance", alliance);
         }
-        Storage.autoRan = Storage.AutoRan.SMALLTRIANGLE;
+        Storage.autoRan = Storage.AutoRan.SMALL_TRIANGLE;
         Pose2d initialPose = new Pose2d(63.9414, 12.4463 * flipAuto, Math.toRadians(179.984) * flipAuto);
         drive = new MecanumDrive(hardwareMap, initialPose);
         Launcher launcher = new Launcher(hardwareMap);
