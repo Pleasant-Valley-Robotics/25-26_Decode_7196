@@ -169,7 +169,7 @@ public class teleOpTwo extends OpMode {
     double frontRightPower;
     double backRightPower;
     public MecanumDrive mecanumDrive;
-    double selectedLaunchVelocity = 0;
+    double selectedLaunchVelocity = 0.0;
 
 // here are the values for auto locking and the automatic velocity calculation
     boolean autoAim = false;
@@ -361,6 +361,8 @@ public class teleOpTwo extends OpMode {
             launcher.setVelocity(selectedLaunchVelocity);
         }
 
+        launcher.setVelocity(selectedLaunchVelocity);
+
 //        if (gamepad2.aWasPressed()) {
 //            intake.setPower(0.25);
 //        }
@@ -379,8 +381,6 @@ public class teleOpTwo extends OpMode {
         if (gamepad2.y) {
             launcher.setPower(0.0);
         }
-
-        launcher.setVelocity(selectedLaunchVelocity);
 
         if (!autoAim) {
             mecanumDrive(
