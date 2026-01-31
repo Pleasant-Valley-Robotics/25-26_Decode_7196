@@ -37,6 +37,8 @@ import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
 import static org.firstinspires.ftc.teamcode.utility.Storage.alliance;
 
 import com.acmerobotics.roadrunner.Pose2d;
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -54,6 +56,7 @@ import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive;
 import org.firstinspires.ftc.teamcode.utility.Storage;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.autos.*;
+import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 
 /*
@@ -108,6 +111,10 @@ public class teleOpTwo extends OpMode {
     private DcMotorEx launcher = null;
     private CRServo leftFeeder = null;
     private CRServo rightFeeder = null;
+
+    private AprilTagProcessor aprilTag;
+    private static final boolean USE_WEBCAM = true; // true for webcam, false for phone camera
+    private Limelight3A limelight;
 
     RevBlinkinLedDriver blinkinLedDriver;
     RevBlinkinLedDriver.BlinkinPattern pattern;
@@ -169,7 +176,6 @@ public class teleOpTwo extends OpMode {
     double frontRightPower;
     double backRightPower;
     public MecanumDrive mecanumDrive;
-    double selectedLaunchVelocity = 0.0;
 
 // here are the values for auto locking and the automatic velocity calculation
     boolean autoAim = false;
@@ -177,6 +183,7 @@ public class teleOpTwo extends OpMode {
     double targetVelocity = 0.0;
     boolean autoVelocity = false;
     double intakePower = 0.0;
+    double selectedLaunchVelocity = 0.0;
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -202,6 +209,7 @@ public class teleOpTwo extends OpMode {
         intake = hardwareMap.get(DcMotor.class, "intake");
         leftFeeder = hardwareMap.get(CRServo.class, "leftFeeder");
         rightFeeder = hardwareMap.get(CRServo.class, "rightFeeder");
+        
         if (Storage.autoRan == Storage.AutoRan.GOAL) {
             mecanumDrive = new MecanumDrive(hardwareMap, GoalAUTORR.drive.localizer.getPose());
         } else if (Storage.autoRan == Storage.AutoRan.SMALL_TRIANGLE) {
@@ -314,6 +322,7 @@ public class teleOpTwo extends OpMode {
     public void loop() {
 // updates the robots position constantly
         mecanumDrive.updatePoseEstimate();
+
         /*
          * Here we call a function called arcadeDrive. The arcadeDrive function takes the input from
          * the joysticks, and applies power to the left and right drive motor to move the robot
@@ -356,12 +365,22 @@ public class teleOpTwo extends OpMode {
         }
 
         if (autoVelocity) {
-            targetVelocity = 5.453091946754939 * GOAL_DISTANCE + (952.3013482434122);
+            targetVelocity = 6.024277839693967 * GOAL_DISTANCE + (845.6037832464833);
             selectedLaunchVelocity = targetVelocity;
             launcher.setVelocity(selectedLaunchVelocity);
         }
 
-        launcher.setVelocity(selectedLaunchVelocity);
+        if (gamepad2.xWasPressed()) {
+            autoVelocity = !autoVelocity;
+        }
+
+        if (gamepad2.bWasPressed()) {
+            autoVelocity = false;
+            selectedLaunchVelocity = 0.0;
+            launcher.setVelocity(selectedLaunchVelocity);
+        }
+
+        //launcher.setVelocity(selectedLaunchVelocity);
 
 //        if (gamepad2.aWasPressed()) {
 //            intake.setPower(0.25);
@@ -374,13 +393,6 @@ public class teleOpTwo extends OpMode {
 
 //        } else if (gamepad2.xWasPressed()) {
 //            autoVelocity = !autoVelocity;
-        if (gamepad2.xWasPressed()) {
-            autoVelocity = !autoVelocity;
-        }
-
-        if (gamepad2.y) {
-            launcher.setPower(0.0);
-        }
 
         if (!autoAim) {
             mecanumDrive(
@@ -427,6 +439,7 @@ public class teleOpTwo extends OpMode {
         telemetry.addData("Distance from Goal", GOAL_DISTANCE);
         telemetry.addData("Velocity", launcher.getVelocity());
         telemetry.addData("Set Launcher Velocity", selectedLaunchVelocity);
+        telemetry.addData("Auto Velocity Status", autoVelocity);
 
         telemetry.addData("Too Close to the Goal: STROBE_RED", pattern = RevBlinkinLedDriver.BlinkinPattern.STROBE_RED);
         telemetry.addData("Not inside the launch triangle: HOT_PINK", pattern = RevBlinkinLedDriver.BlinkinPattern.HOT_PINK);
