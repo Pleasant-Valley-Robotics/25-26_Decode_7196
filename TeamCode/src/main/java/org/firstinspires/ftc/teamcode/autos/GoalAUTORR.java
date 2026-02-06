@@ -89,23 +89,23 @@ public class GoalAUTORR extends LinearOpMode {
                 new SequentialAction(
                         goToShoot.build(),
                         new SleepAction(0.01),
-                        launcher.ShootBall(),
+                        launcher.ShootBallClose(),
                         intake.outtakeBall(),
                         intake.intakeBall(),
                         new SleepAction(0.1),
                         intake.stopIntakeBall(),
-                        launcher.ShootBall(),
+                        launcher.ShootBallClose(),
                         intake.outtakeBall(),
                         intake.intakeBall(),
                         new SleepAction(0.1),
                         intake.stopIntakeBall(),
                         new SleepAction(0.01),
-                        launcher.ShootBall(),
+                        launcher.ShootBallClose(),
                         new SleepAction(0.01)
                 )
         ); // first round of shooting the pre-loaded artifacts
 
-        Vector2d intakeOne = new Vector2d(-12.0, 30.0 * flipAuto);
+        Vector2d intakeOne = new Vector2d(-13.0, 30.0 * flipAuto);
         TrajectoryActionBuilder goToIntakeOne = drive.actionBuilder(drive.localizer.getPose())
                 .strafeToLinearHeading(intakeOne, Math.toRadians(90.0) * flipAuto)
                 //.turnTo(Math.toRadians(90)*flipAuto)
@@ -118,7 +118,7 @@ public class GoalAUTORR extends LinearOpMode {
         ); //moving to the first position to intake artifacts
 
         TrajectoryActionBuilder goToIntakeOneCollect = drive.actionBuilder(drive.localizer.getPose())
-                .lineToYConstantHeading(43.0 * flipAuto)
+                .lineToYConstantHeading(52.0 * flipAuto)
                 .waitSeconds(0.1); // First set of artifacts intaked
 
         Actions.runBlocking(
@@ -130,7 +130,7 @@ public class GoalAUTORR extends LinearOpMode {
 
         Vector2d shootPositionOne = new Vector2d(-30.6209, 21.5313 * flipAuto);
         TrajectoryActionBuilder goToShootOne = drive.actionBuilder(drive.localizer.getPose())
-                .strafeToLinearHeading(shootPositionOne, 129.0 * (Math.PI/180.0 * flipAuto))
+                .strafeToLinearHeading(shootPositionOne, 135.0 * (Math.PI/180.0 * flipAuto))
                 //.turnTo(129.0*Math.PI/180.0*flipAuto)
                 .waitSeconds(0.05); // first time moving to the shooting position
 
@@ -140,25 +140,33 @@ public class GoalAUTORR extends LinearOpMode {
                         goToShootOne.build(),
                         intake.stopIntakeBall(),
                         new SleepAction(0.01),
-                        launcher.ShootBall(),
+                        launcher.ShootBallClose(),
                         //intake.outtakeBall(),
                         intake.intakeBall(),
                         new SleepAction(0.1),
                         intake.stopIntakeBall(),
-                        launcher.ShootBall(),
+                        launcher.ShootBallClose(),
                         new SleepAction(0.15),
                         intake.outtakeBall(),
-                        new SleepAction(0.35),
+                        new SleepAction(0.45),
                         intake.intakeBall(),
                         new SleepAction(0.35),
                         intake.stopIntakeBall(),
                         new SleepAction(0.01),
-                        launcher.ShootBall(),
+                        launcher.ShootBallClose(),
+                        new SleepAction(0.15),
+                        intake.outtakeBall(),
+                        new SleepAction(0.4),
+                        intake.intakeBall(),
+                        new SleepAction(0.35),
+                        intake.stopIntakeBall(),
+                        new SleepAction(0.01),
+                        launcher.ShootBallClose(),
                         new SleepAction(0.01)
                 )
         ); // robot shoots the second round of artifacts after intaking
 
-        Vector2d intakeTwo = new Vector2d(14.0, 30.0 * flipAuto);
+        Vector2d intakeTwo = new Vector2d(10.0, 30.0 * flipAuto);
         TrajectoryActionBuilder goToIntakeTwo = drive.actionBuilder(drive.localizer.getPose())
                 .strafeToLinearHeading(intakeTwo, Math.toRadians(90.0) * flipAuto)
                 //.turnTo(Math.toRadians(90) * flipAuto)
@@ -171,7 +179,7 @@ public class GoalAUTORR extends LinearOpMode {
         ); //moving to the first position to intake artifacts
 
         TrajectoryActionBuilder goToIntakeTwoCollect = drive.actionBuilder(drive.localizer.getPose())
-                .lineToYConstantHeading(45.0 * flipAuto)
+                .lineToYConstantHeading(52.0 * flipAuto)
                 .waitSeconds(0.1); // First set of artifacts intaked
 
         Actions.runBlocking(
@@ -181,31 +189,49 @@ public class GoalAUTORR extends LinearOpMode {
                 )
         ); // The robot moves forward as it collects the artifacts
 
-        Vector2d shootPositionTwo = new Vector2d(-30.6209, 21.5313 * flipAuto);
+        TrajectoryActionBuilder goToIntakeTwoReturn = drive.actionBuilder(drive.localizer.getPose())
+                .lineToYConstantHeading(45.0 * flipAuto)
+                .waitSeconds(0.1); // First set of artifacts intaked
+
+        Actions.runBlocking(
+                new SequentialAction((
+                        intake.intakeBall()),
+                        goToIntakeTwoReturn.build()
+                )
+        ); // The robot moves forward as it collects the artifacts
+
+        Vector2d shootPositionTwo = new Vector2d(-70.0, 5.0 * flipAuto);
         TrajectoryActionBuilder goToShootTwo = drive.actionBuilder(drive.localizer.getPose())
-                .strafeToLinearHeading(shootPositionTwo, 140.0 * (Math.PI/180.0 * flipAuto))
+                .strafeToLinearHeading(shootPositionTwo, 90.0 * (Math.PI/180.0 * flipAuto))
                 //.turnTo(129.0*Math.PI/180.0*flipAuto)
                 .waitSeconds(0.05); // first time moving to the shooting position
 
         Actions.runBlocking(
                 new SequentialAction(
                         new SleepAction(0.1),
-                        goToShootOne.build(),
+                        goToShootTwo.build(),
                         intake.stopIntakeBall(),
                         new SleepAction(0.01),
-                        launcher.ShootBall(),
+                        launcher.ShootBallClose(),
                         //intake.outtakeBall(),
                         intake.intakeBall(),
                         new SleepAction(0.1),
                         intake.stopIntakeBall(),
-                        launcher.ShootBall(),
+                        launcher.ShootBallClose(),
                         intake.outtakeBall(),
-                        new SleepAction(0.3),
+                        new SleepAction(0.45),
                         intake.intakeBall(),
                         new SleepAction(0.3),
                         intake.stopIntakeBall(),
                         new SleepAction(0.01),
-                        launcher.ShootBall(),
+                        launcher.ShootBallClose(),
+                        intake.outtakeBall(),
+                        new SleepAction(0.35),
+                        intake.intakeBall(),
+                        new SleepAction(0.3),
+                        intake.stopIntakeBall(),
+                        new SleepAction(0.01),
+                        launcher.ShootBallClose(),
                         new SleepAction(0.01)
                 )
         ); // robot shoots the second round of artifacts after intaking
@@ -223,7 +249,7 @@ public class GoalAUTORR extends LinearOpMode {
         ); //moving to the first position to intake artifacts
 
         TrajectoryActionBuilder goToIntakeThreeCollect = drive.actionBuilder(drive.localizer.getPose())
-                .lineToYConstantHeading(45.0 * flipAuto)
+                .lineToYConstantHeading(48.0 * flipAuto)
                 .waitSeconds(0.1); // First set of artifacts intaked
 
         Actions.runBlocking(
