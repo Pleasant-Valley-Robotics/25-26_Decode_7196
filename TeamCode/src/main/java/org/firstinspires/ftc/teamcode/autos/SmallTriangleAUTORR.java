@@ -108,14 +108,13 @@ public class SmallTriangleAUTORR extends LinearOpMode {
         ); // first round of shooting the pre-loaded artifacts
 
         TrajectoryActionBuilder goToIntakeReturn = drive.actionBuilder(drive.localizer.getPose())
-                .lineToXConstantHeading(7.0 * flipAuto)
+                .lineToXConstantHeading(52.2828 * flipAuto)
                 .waitSeconds(0.1); // First set of artifacts intaked
 
         Actions.runBlocking(
                 new SequentialAction((
-                        intake.intakeBall()),
                         goToIntakeReturn.build()
-                )
+                ))
         ); // The robot moves forward as it collects the artifacts
 
         Vector2d intakeOne = new Vector2d(36.0, 30.0 * flipAuto);

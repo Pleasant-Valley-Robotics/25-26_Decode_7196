@@ -380,6 +380,16 @@ public class teleOpTwo extends OpMode {
             launcher.setVelocity(selectedLaunchVelocity);
         }
 
+        if (gamepad2.leftBumperWasPressed()){
+            leftFeeder.setPower(1.0);
+            rightFeeder.setPower(1.0);
+        }
+
+        if (gamepad2.leftBumperWasReleased()){
+            leftFeeder.setPower(0.0);
+            rightFeeder.setPower(0.0);
+        }
+
         //launcher.setVelocity(selectedLaunchVelocity);
 
 //        if (gamepad2.aWasPressed()) {
@@ -415,7 +425,6 @@ public class teleOpTwo extends OpMode {
         }
 
         launch(gamepad2.rightBumperWasPressed());
-        index(gamepad2.leftBumperWasPressed());
         //inOutBall(gamepad1.aWasPressed());
         intake.setPower(intakePower);
         intake.setPower(-gamepad2.left_stick_y);
