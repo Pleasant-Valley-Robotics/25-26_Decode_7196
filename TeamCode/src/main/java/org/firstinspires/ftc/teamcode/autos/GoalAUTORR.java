@@ -166,7 +166,7 @@ public class GoalAUTORR extends LinearOpMode {
                 )
         ); // robot shoots the second round of artifacts after intaking
 
-        Vector2d intakeTwo = new Vector2d(10.0, 30.0 * flipAuto);
+        Vector2d intakeTwo = new Vector2d(12.0, 30.0 * flipAuto);
         TrajectoryActionBuilder goToIntakeTwo = drive.actionBuilder(drive.localizer.getPose())
                 .strafeToLinearHeading(intakeTwo, Math.toRadians(90.0) * flipAuto)
                 //.turnTo(Math.toRadians(90) * flipAuto)

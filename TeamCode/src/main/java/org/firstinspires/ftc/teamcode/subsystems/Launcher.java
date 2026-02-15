@@ -94,16 +94,16 @@ public class Launcher {
             }
             double vel = launcher.getVelocity();
             packet.put("launcherVelocity", vel);
-            if (vel > 1700.0) {
+            if (vel > 1675.0) {
                 double tim = feederTimer.seconds();
                 packet.put("feederTimer", tim);
-                launcher.setVelocity(1700.0);
+                launcher.setVelocity(1675.0);
                 leftFeeder.setPower(1.0);
                 rightFeeder.setPower(1.0);
                 startedShooting = true;
 
             } else if (!startedShooting) {
-                launcher.setVelocity(1700.0);
+                launcher.setVelocity(1675.0);
                 feederTimer.reset();
                 feederTimer.startTime();
             }
