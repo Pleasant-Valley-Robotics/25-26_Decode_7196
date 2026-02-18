@@ -50,16 +50,16 @@ public class Launcher {
             }
             double vel = launcher.getVelocity();
             packet.put("launcherVelocity", vel);
-            if (vel > 1300.0) {
+            if (vel > 1250.0) {
                 double tim = feederTimer.seconds();
                 packet.put("feederTimer", tim);
-                launcher.setVelocity(1300.0);
+                launcher.setVelocity(1250.0);
                 leftFeeder.setPower(1.0);
                 rightFeeder.setPower(1.0);
                 startedShooting = true;
 
             } else if (!startedShooting) {
-                launcher.setVelocity(1300.0);
+                launcher.setVelocity(1250.0);
                 feederTimer.reset();
                 feederTimer.startTime();
             }
@@ -101,7 +101,6 @@ public class Launcher {
                 leftFeeder.setPower(1.0);
                 rightFeeder.setPower(1.0);
                 startedShooting = true;
-
             } else if (!startedShooting) {
                 launcher.setVelocity(1675.0);
                 feederTimer.reset();
@@ -119,6 +118,51 @@ public class Launcher {
     public Action ShootBallFar()
     {
         return new ShootBallFar();
+    }
+
+
+    public class RapidShoot implements Action {
+        private boolean initialized = false;
+        private boolean startedShooting = false;
+
+        @Override
+        public boolean run(@NonNull TelemetryPacket packet) {
+            if (!initialized) {
+                initialized = true;
+                startedShooting = false;
+                launcher.setVelocity(0.0);
+                leftFeeder.setPower(0.0);
+                rightFeeder.setPower(0.0);
+                feederTimer.reset();
+                feederTimer.startTime();
+            }
+            double vel = launcher.getVelocity();
+            packet.put("launcherVelocity", vel);
+            if (vel > 1250.0) {
+                double tim = feederTimer.seconds();
+                packet.put("feederTimer", tim);
+                launcher.setVelocity(1250.0);
+                leftFeeder.setPower(1.0);
+                rightFeeder.setPower(1.0);
+                startedShooting = true;
+                }
+            else if (!startedShooting) {
+            launcher.setVelocity(1250.0);
+            feederTimer.reset();
+            feederTimer.startTime();
+            }
+            if (feederTimer.seconds() > 2.5) {
+            leftFeeder.setPower(0.0);
+            rightFeeder.setPower(0.0);
+            launcher.setVelocity(0.0);
+            return false;
+        }
+            return true;
+        }
+    }
+    public Action RapidShoot()
+    {
+        return new RapidShoot();
     }
 
 public class IndexBall implements Action {

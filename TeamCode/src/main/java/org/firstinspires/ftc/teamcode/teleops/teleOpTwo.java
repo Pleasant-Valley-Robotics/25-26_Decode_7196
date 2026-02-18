@@ -99,8 +99,8 @@ public class teleOpTwo extends OpMode {
      */
 
     //here are the neutral set values for the goals used in auto locking
-    double GOAL_X = -72.0;
-    double GOAL_Y = 72.0;
+    double GOAL_X = -70.0;
+    double GOAL_Y = 70.0;
 
     // Declare OpMode members.
     private DcMotor frontLeftDrive = null;
@@ -340,10 +340,14 @@ public class teleOpTwo extends OpMode {
 
 //here is where the goal location values are differentiated for the two different alliances
         if (alliance == Storage.Alliance.BLUE) {
-            GOAL_Y = -72.0;
+            GOAL_Y = -70.0;
         }
         else if(alliance == Storage.Alliance.RED) {
-            GOAL_Y = 72.0;
+            GOAL_Y = 70.0;
+        }
+
+        if (gamepad2.yWasPressed()) {
+            mecanumDrive.localizer.setPose(new Pose2d(68.0966, 60.3413, -87.2192));
         }
 
 // these are the values and equations to calculate the velocity
@@ -365,7 +369,7 @@ public class teleOpTwo extends OpMode {
         }
 
         if (autoVelocity) {
-            targetVelocity = 6.024277839693967 * GOAL_DISTANCE + (845.6037832464833);
+            targetVelocity = 5.37 * (GOAL_DISTANCE + Math.sqrt(8.0)) + (914.0);
             selectedLaunchVelocity = targetVelocity;
             launcher.setVelocity(selectedLaunchVelocity);
         }
@@ -516,8 +520,8 @@ public class teleOpTwo extends OpMode {
                 }
                 break;
             case SPIN_UP:
-                launcher.setVelocity(LAUNCHER_TARGET_VELOCITY);
-                if (launcher.getVelocity() > LAUNCHER_MIN_VELOCITY) {
+                launcher.setVelocity(selectedLaunchVelocity);
+                if (launcher.getVelocity() > selectedLaunchVelocity - 25.0) {
                     launchState = LaunchState.LAUNCH;
                 }
                 break;

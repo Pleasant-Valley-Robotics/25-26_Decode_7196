@@ -106,7 +106,7 @@ public class SmallTriangleAUTORR extends LinearOpMode {
                 )
         ); // first round of shooting the pre-loaded artifacts
 
-        Vector2d intakeReturn = new Vector2d(52.2828, 3.031 * flipAuto);
+        Vector2d intakeReturn = new Vector2d(46.2828, 3.031 * flipAuto);
         TrajectoryActionBuilder goToIntakeReturn = drive.actionBuilder(drive.localizer.getPose())
                 .strafeToLinearHeading(intakeReturn, Math.toRadians(180.0) * flipAuto)
                 .waitSeconds(0.1); // First set of artifacts intaked
