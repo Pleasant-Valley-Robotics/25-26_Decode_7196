@@ -89,7 +89,7 @@ public class GoalAUTORR extends LinearOpMode {
                 new SequentialAction(
                         goToShoot.build(),
                         new SleepAction(0.01),
-                        launcher.RapidShoot()
+                        launcher.RapidShootClose()
                 )
         ); // first round of shooting the pre-loaded artifacts
 

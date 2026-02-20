@@ -121,7 +121,7 @@ public class Launcher {
     }
 
 
-    public class RapidShoot implements Action {
+    public class RapidShootClose implements Action {
         private boolean initialized = false;
         private boolean startedShooting = false;
 
@@ -160,9 +160,53 @@ public class Launcher {
             return true;
         }
     }
-    public Action RapidShoot()
+    public Action RapidShootClose()
     {
-        return new RapidShoot();
+        return new RapidShootClose();
+    }
+
+    public class RapidShootFar implements Action {
+        private boolean initialized = false;
+        private boolean startedShooting = false;
+
+        @Override
+        public boolean run(@NonNull TelemetryPacket packet) {
+            if (!initialized) {
+                initialized = true;
+                startedShooting = false;
+                launcher.setVelocity(0.0);
+                leftFeeder.setPower(0.0);
+                rightFeeder.setPower(0.0);
+                feederTimer.reset();
+                feederTimer.startTime();
+            }
+            double vel = launcher.getVelocity();
+            packet.put("launcherVelocity", vel);
+            if (vel > 1675.0) {
+                double tim = feederTimer.seconds();
+                packet.put("feederTimer", tim);
+                launcher.setVelocity(1675.0);
+                leftFeeder.setPower(1.0);
+                rightFeeder.setPower(1.0);
+                startedShooting = true;
+            }
+            else if (!startedShooting) {
+                launcher.setVelocity(1675.0);
+                feederTimer.reset();
+                feederTimer.startTime();
+            }
+            if (feederTimer.seconds() > 2.5) {
+                leftFeeder.setPower(0.0);
+                rightFeeder.setPower(0.0);
+                launcher.setVelocity(0.0);
+                return false;
+            }
+            return true;
+        }
+    }
+    public Action RapidShootFar()
+    {
+        return new RapidShootFar();
     }
 
 public class IndexBall implements Action {
