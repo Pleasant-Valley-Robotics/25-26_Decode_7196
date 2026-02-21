@@ -369,7 +369,7 @@ public class teleOpTwo extends OpMode {
         }
 
         if (autoVelocity) {
-            targetVelocity = 5.37 * (GOAL_DISTANCE + Math.sqrt(8.0)) + (914.0);
+            targetVelocity = 5.37 * (GOAL_DISTANCE + (Math.sqrt(8.0))) + (914.0);
             selectedLaunchVelocity = targetVelocity;
             launcher.setVelocity(selectedLaunchVelocity);
         }
@@ -427,6 +427,13 @@ public class teleOpTwo extends OpMode {
             pattern = RevBlinkinLedDriver.BlinkinPattern.ORANGE;
             blinkinLedDriver.setPattern(pattern);
         }
+
+        if (gamepad2.dpadUpWasPressed()) {
+            launcher.setVelocity(selectedLaunchVelocity + 50.0);
+        }
+         if (gamepad2.dpadDownWasPressed()) {
+             launcher.setVelocity(selectedLaunchVelocity - 10.0);
+         }
 
         launch(gamepad2.rightBumperWasPressed());
         //inOutBall(gamepad1.aWasPressed());
