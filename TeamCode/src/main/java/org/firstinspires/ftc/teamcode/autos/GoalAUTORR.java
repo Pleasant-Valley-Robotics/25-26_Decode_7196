@@ -136,7 +136,7 @@ public class GoalAUTORR extends LinearOpMode {
                         launcher.ShootBallClose(),
                         new SleepAction(0.15),
                         intake.intakeBall(),
-                        new SleepAction(0.4),
+                        new SleepAction(0.45),
                         intake.stopIntakeBall(),
                         launcher.ShootBallClose(),
                         new SleepAction(0.01)

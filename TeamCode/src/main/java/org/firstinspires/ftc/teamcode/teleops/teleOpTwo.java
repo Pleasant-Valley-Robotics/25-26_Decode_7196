@@ -346,8 +346,12 @@ public class teleOpTwo extends OpMode {
             GOAL_Y = 70.0;
         }
 
-        if (gamepad2.yWasPressed()) {
+        if (gamepad1.yWasPressed()) {
             mecanumDrive.localizer.setPose(new Pose2d(68.0966, 60.3413, -87.2192));
+        }
+
+        if (gamepad1.bWasPressed()) {
+            mecanumDrive.localizer.setPose(new Pose2d(0.0, 0.0, 0.0));
         }
 
 // these are the values and equations to calculate the velocity
@@ -369,7 +373,7 @@ public class teleOpTwo extends OpMode {
         }
 
         if (autoVelocity) {
-            targetVelocity = 5.37 * (GOAL_DISTANCE + (Math.sqrt(8.0))) + (914.0);
+            targetVelocity = 4.32 * (GOAL_DISTANCE + (Math.sqrt(8.0))) + (982.0);
             selectedLaunchVelocity = targetVelocity;
             launcher.setVelocity(selectedLaunchVelocity);
         }
@@ -377,6 +381,16 @@ public class teleOpTwo extends OpMode {
         if (gamepad2.xWasPressed()) {
             autoVelocity = !autoVelocity;
         }
+
+//        if (gamepad2.aWasPressed()) {
+//            selectedLaunchVelocity += 50;
+//            launcher.setVelocity(selectedLaunchVelocity);
+//        }
+//
+//        if (gamepad2.yWasPressed()) {
+//            selectedLaunchVelocity -= 10;
+//            launcher.setVelocity(selectedLaunchVelocity);
+//        }
 
         if (gamepad2.bWasPressed()) {
             autoVelocity = false;
@@ -428,13 +442,6 @@ public class teleOpTwo extends OpMode {
             blinkinLedDriver.setPattern(pattern);
         }
 
-        if (gamepad2.dpadUpWasPressed()) {
-            launcher.setVelocity(selectedLaunchVelocity + 50.0);
-        }
-         if (gamepad2.dpadDownWasPressed()) {
-             launcher.setVelocity(selectedLaunchVelocity - 10.0);
-         }
-
         launch(gamepad2.rightBumperWasPressed());
         //inOutBall(gamepad1.aWasPressed());
         intake.setPower(intakePower);
@@ -461,9 +468,9 @@ public class teleOpTwo extends OpMode {
         telemetry.addData("Set Launcher Velocity", selectedLaunchVelocity);
         telemetry.addData("Auto Velocity Status", autoVelocity);
 
-        telemetry.addData("Too Close to the Goal: STROBE_RED", pattern = RevBlinkinLedDriver.BlinkinPattern.STROBE_RED);
-        telemetry.addData("Not inside the launch triangle: HOT_PINK", pattern = RevBlinkinLedDriver.BlinkinPattern.HOT_PINK);
-        telemetry.addData("", pattern = RevBlinkinLedDriver.BlinkinPattern.STROBE_WHITE);
+//        telemetry.addData("Too Close to the Goal: STROBE_RED", pattern = RevBlinkinLedDriver.BlinkinPattern.STROBE_RED);
+//        telemetry.addData("Not inside the launch triangle: HOT_PINK", pattern = RevBlinkinLedDriver.BlinkinPattern.HOT_PINK);
+//        telemetry.addData("", pattern = RevBlinkinLedDriver.BlinkinPattern.STROBE_WHITE);
 
         telemetry.addData("intakePower: ", intakePower);
         telemetry.update();

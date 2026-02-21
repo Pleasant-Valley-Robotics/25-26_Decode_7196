@@ -44,7 +44,7 @@ public class SmallTriangleAUTORR extends LinearOpMode {
             telemetry.addData("Selected Alliance", alliance);
         }
         Storage.autoRan = Storage.AutoRan.SMALL_TRIANGLE;
-        Pose2d initialPose = new Pose2d(63.9414, 12.4463 * flipAuto, Math.toRadians(179.984) * flipAuto);
+        Pose2d initialPose = new Pose2d(62.699, 12.2837 * flipAuto, Math.toRadians(179.6861) * flipAuto);
         drive = new MecanumDrive(hardwareMap, initialPose);
         Launcher launcher = new Launcher(hardwareMap);
         Intake intake = new Intake(hardwareMap);
@@ -78,9 +78,9 @@ public class SmallTriangleAUTORR extends LinearOpMode {
             telemetry.update();
         }*/ // end indexing
 
-        Vector2d shootPosition = new Vector2d(59.2828, 3.031 * flipAuto);
+        Vector2d shootPosition = new Vector2d(59.4778, 5.8122 * flipAuto);
         TrajectoryActionBuilder goToShoot = drive.actionBuilder(drive.localizer.getPose())
-                .strafeToLinearHeading(shootPosition, 156.2197 * (Math.PI/180.0 * flipAuto))
+                .strafeToLinearHeading(shootPosition, 155.6556 * (Math.PI/180.0 * flipAuto))
                 //.turnTo(129.0*Math.PI/180.0*flipAuto)
                 //.turnTo(129.0 * Math.PI/180.0*flipAuto)
                 //.turnTo(Math.9PI/2)
