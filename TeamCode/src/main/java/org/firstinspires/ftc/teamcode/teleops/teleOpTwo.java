@@ -36,6 +36,8 @@ import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
 
 import static org.firstinspires.ftc.teamcode.utility.Storage.alliance;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
@@ -74,7 +76,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
  * we will also need to adjust the "PIDF" coefficients with some that are a better fit for our application.
  */
 
-@TeleOp(name = "teleOpTwo", group = "StarterBot")
+@TeleOp(name = "teleOpTwo", group = "Linear OpMode")
 public class teleOpTwo extends OpMode {
     final double FEED_TIME_SECONDS = 0.50; //The feeder servos run this long when a shot is requested.
     final double STOP_SPEED = 0.0; //We send this power to the servos when we want them to stop.
@@ -191,6 +193,7 @@ public class teleOpTwo extends OpMode {
 
     @Override
     public void init() {
+        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         launchState = LaunchState.IDLE;
         indexState = IndexState.IDLE_INDEX;
 //        inOutBallState = InOutBallState.IDLE_BALL;
