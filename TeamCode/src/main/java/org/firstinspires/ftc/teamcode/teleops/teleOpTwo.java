@@ -37,6 +37,7 @@ import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
 import static org.firstinspires.ftc.teamcode.utility.Storage.alliance;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.qualcomm.hardware.limelightvision.LLResult;
@@ -47,6 +48,7 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 
@@ -75,9 +77,10 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
  * Since the dynamics of a launcher wheel system varies greatly from those of most other FTC mechanisms,
  * we will also need to adjust the "PIDF" coefficients with some that are a better fit for our application.
  */
-
+@Config
 @TeleOp(name = "teleOpTwo", group = "Linear OpMode")
 public class teleOpTwo extends OpMode {
+
     final double FEED_TIME_SECONDS = 0.50; //The feeder servos run this long when a shot is requested.
     final double STOP_SPEED = 0.0; //We send this power to the servos when we want them to stop.
     final double FULL_SPEED = 1.0;
@@ -193,6 +196,7 @@ public class teleOpTwo extends OpMode {
 
     @Override
     public void init() {
+
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         launchState = LaunchState.IDLE;
         indexState = IndexState.IDLE_INDEX;
@@ -274,7 +278,7 @@ public class teleOpTwo extends OpMode {
         leftFeeder.setPower(STOP_SPEED);
         rightFeeder.setPower(STOP_SPEED);
 
-        //launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(300, 0, 0, 10));
+        launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(300,0,0,13.485));
 
         /*
          * Much like our drivetrain motors, we set the left feeder servo to reverse so that they
@@ -350,7 +354,7 @@ public class teleOpTwo extends OpMode {
         }
 
         if (gamepad1.yWasPressed()) {
-            mecanumDrive.localizer.setPose(new Pose2d(68.0966, 60.3413, -87.2192));
+            mecanumDrive.localizer.setPose(new Pose2d(68.0966, 60.3413, -87.2192*(Math.PI/180.0`)));
         }
 
         if (gamepad1.bWasPressed()) {
@@ -385,15 +389,15 @@ public class teleOpTwo extends OpMode {
             autoVelocity = !autoVelocity;
         }
 
-//        if (gamepad2.aWasPressed()) {
-//            selectedLaunchVelocity += 50;
-//            launcher.setVelocity(selectedLaunchVelocity);
-//        }
-//
-//        if (gamepad2.yWasPressed()) {
-//            selectedLaunchVelocity -= 10;
-//            launcher.setVelocity(selectedLaunchVelocity);
-//        }
+        if (gamepad2.aWasPressed()) {
+            selectedLaunchVelocity += 10;
+            launcher.setVelocity(selectedLaunchVelocity);
+        }
+
+        if (gamepad2.yWasPressed()) {
+            selectedLaunchVelocity -= 10;
+            launcher.setVelocity(selectedLaunchVelocity);
+        }
 
         if (gamepad2.bWasPressed()) {
             autoVelocity = false;

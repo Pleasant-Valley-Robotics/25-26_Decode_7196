@@ -24,7 +24,7 @@ public class Launcher {
         launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         launcher.setDirection(DcMotor.Direction.FORWARD);
         launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(1000,0,0,15));
+        launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(300,0,0,13.845));
         leftFeeder = hardwareMap.get(CRServo.class, "leftFeeder");
         leftFeeder.setPower(0.0);
         leftFeeder.setDirection(DcMotor.Direction.FORWARD);
