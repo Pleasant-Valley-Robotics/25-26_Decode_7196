@@ -189,6 +189,8 @@ public class teleOpTwo extends OpMode {
     boolean autoVelocity = false;
     double intakePower = 0.0;
     double selectedLaunchVelocity = 0.0;
+    double SaumyaaAdjust = 0.0;
+    double resetSpot = 1.0;
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -304,10 +306,12 @@ public class teleOpTwo extends OpMode {
             alliance = Storage.Alliance.RED;
             pattern = RevBlinkinLedDriver.BlinkinPattern.RED;
             blinkinLedDriver.setPattern(pattern);
+            resetSpot = 1.0;
         } else if (gamepad1.x) {
             alliance = Storage.Alliance.BLUE;
             pattern = RevBlinkinLedDriver.BlinkinPattern.BLUE;
             blinkinLedDriver.setPattern(pattern);
+            resetSpot = -1.0;
         }
 
         telemetry.addData("Press X", "for BLUE");
@@ -354,7 +358,7 @@ public class teleOpTwo extends OpMode {
         }
 
         if (gamepad1.yWasPressed()) {
-            mecanumDrive.localizer.setPose(new Pose2d(68.0966, 60.3413, -87.2192*(Math.PI/180.0`)));
+            mecanumDrive.localizer.setPose(new Pose2d(68.0966, 60.3413 * resetSpot, -87.2192 * (Math.PI/180.0) * resetSpot));
         }
 
         if (gamepad1.bWasPressed()) {
@@ -380,7 +384,7 @@ public class teleOpTwo extends OpMode {
         }
 
         if (autoVelocity) {
-            targetVelocity = 4.32 * (GOAL_DISTANCE + (Math.sqrt(8.0))) + (982.0);
+            targetVelocity = 4.32 * (GOAL_DISTANCE + (Math.sqrt(8.0))) + (982.0) + SaumyaaAdjust;
             selectedLaunchVelocity = targetVelocity;
             launcher.setVelocity(selectedLaunchVelocity);
         }
@@ -389,14 +393,12 @@ public class teleOpTwo extends OpMode {
             autoVelocity = !autoVelocity;
         }
 
-        if (gamepad2.aWasPressed()) {
-            selectedLaunchVelocity += 10;
-            launcher.setVelocity(selectedLaunchVelocity);
+        if (gamepad2.yWasPressed()) {
+            SaumyaaAdjust += 10;
         }
 
-        if (gamepad2.yWasPressed()) {
-            selectedLaunchVelocity -= 10;
-            launcher.setVelocity(selectedLaunchVelocity);
+        if (gamepad2.aWasPressed()) {
+            SaumyaaAdjust = SaumyaaAdjust - 10;
         }
 
         if (gamepad2.bWasPressed()) {

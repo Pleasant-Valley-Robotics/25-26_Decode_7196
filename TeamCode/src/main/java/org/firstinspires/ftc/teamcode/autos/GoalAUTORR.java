@@ -143,7 +143,7 @@ public class GoalAUTORR extends LinearOpMode {
                 )
         ); // robot shoots the second round of artifacts after intaking
 
-        Vector2d intakeTwo = new Vector2d(12.0, 30.0 * flipAuto);
+        Vector2d intakeTwo = new Vector2d(13.0, 30.0 * flipAuto);
         TrajectoryActionBuilder goToIntakeTwo = drive.actionBuilder(drive.localizer.getPose())
                 .strafeToLinearHeading(intakeTwo, Math.toRadians(90.0) * flipAuto)
                 //.turnTo(Math.toRadians(90) * flipAuto)
@@ -168,6 +168,7 @@ public class GoalAUTORR extends LinearOpMode {
 
         TrajectoryActionBuilder goToIntakeTwoReturn = drive.actionBuilder(drive.localizer.getPose())
                 .lineToYConstantHeading(45.0 * flipAuto)
+                .lineToYConstantHeading(48.0 * flipAuto)
                 .waitSeconds(0.1); // First set of artifacts intaked
 
         Actions.runBlocking(
@@ -197,7 +198,7 @@ public class GoalAUTORR extends LinearOpMode {
                         launcher.ShootBallClose(),
                         new SleepAction(0.15),
                         intake.intakeBall(),
-                        new SleepAction(0.4),
+                        new SleepAction(0.45),
                         intake.stopIntakeBall(),
                         launcher.ShootBallClose(),
                         new SleepAction(0.01)
