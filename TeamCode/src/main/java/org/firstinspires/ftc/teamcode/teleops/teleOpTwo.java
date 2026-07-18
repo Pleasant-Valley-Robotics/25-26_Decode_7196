@@ -40,8 +40,6 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.Pose2d;
-import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -55,12 +53,13 @@ import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.internal.system.Deadline;
 
+import org.firstinspires.ftc.teamcode.subsystems.Camera;
 import org.firstinspires.ftc.teamcode.subsystems.Launcher;
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive;
+import org.firstinspires.ftc.teamcode.utility.FieldVisualizer;
 import org.firstinspires.ftc.teamcode.utility.Storage;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.autos.*;
-import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 
 /*
@@ -117,9 +116,8 @@ public class teleOpTwo extends OpMode {
     private CRServo leftFeeder = null;
     private CRServo rightFeeder = null;
 
-    private AprilTagProcessor aprilTag;
-    private static final boolean USE_WEBCAM = true; // true for webcam, false for phone camera
-    private Limelight3A limelight;
+    private Camera camera;
+    private final FieldVisualizer fieldVisualizer = new FieldVisualizer();
 
     RevBlinkinLedDriver blinkinLedDriver;
     RevBlinkinLedDriver.BlinkinPattern pattern;
@@ -219,12 +217,27 @@ public class teleOpTwo extends OpMode {
         leftFeeder = hardwareMap.get(CRServo.class, "leftFeeder");
         rightFeeder = hardwareMap.get(CRServo.class, "rightFeeder");
         
-        if (Storage.autoRan == Storage.AutoRan.GOAL) {
+        if (Storage.autoRan == Storage.AutoRan.GOAL && GoalAUTORR.drive != null) {
             mecanumDrive = new MecanumDrive(hardwareMap, GoalAUTORR.drive.localizer.getPose());
-        } else if (Storage.autoRan == Storage.AutoRan.SMALL_TRIANGLE) {
+        } else if (Storage.autoRan == Storage.AutoRan.SMALL_TRIANGLE && SmallTriangleAUTORR.drive != null) {
             mecanumDrive = new MecanumDrive(hardwareMap, SmallTriangleAUTORR.drive.localizer.getPose());
+        } else {
+            // No auto ran this power cycle (bench testing or practice driving), so
+            // there is no carried-over pose. Start at field center instead of crashing.
+            mecanumDrive = new MecanumDrive(hardwareMap, new Pose2d(0.0, 0.0, 0.0));
         }
         blinkinLedDriver = hardwareMap.get(RevBlinkinLedDriver.class, "blinkin");
+
+        /*
+         * The Limelight feeds the AprilTag robot pose to the dashboard field view.
+         * If it is unplugged or missing from the config, keep the teleop drivable
+         * and just show the odometry marker.
+         */
+        try {
+            camera = new Camera(hardwareMap);
+        } catch (Exception e) {
+            camera = null;
+        }
 
 
         /*
@@ -459,6 +472,14 @@ public class teleOpTwo extends OpMode {
         //telemetry.addData("State", launchState);
         //telemetry.addData("Motors", "left (%.2f), right (%.2f)", frontLeftPower, backLeftPower, frontRightPower, backRightPower);
         //telemetry.addData("motorSpeed", launcher.getVelocity());
+
+        // Live robot tracking on the dashboard field view: BLUE = odometry, GREEN = AprilTag.
+        Pose2d visionPose = null;
+        if (camera != null) {
+            camera.updateHeading(mecanumDrive.localizer.getPose().heading.toDouble());
+            visionPose = camera.getRobotPose();
+        }
+        fieldVisualizer.update(mecanumDrive.localizer.getPose(), visionPose, camera);
 
         // these are all of the basic values of the robot's position and the goal's heading
         telemetry.addData("X", mecanumDrive.localizer.getPose().position.x);
